@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.MainPage"
+             NavigationPage.HasNavigationBar="False">
+
+    <Grid ColumnDefinitions="250, *">
+
+        <Border Grid.Column="0" BackgroundColor="#2C3E50" StrokeThickness="0">
+            <ScrollView>
+                <VerticalStackLayout Grid.Column="0" BackgroundColor="#2C3E50" Padding="20" Spacing="15">
+
+                    <Label Text="KAFESON" FontSize="32" FontAttributes="Bold" TextColor="White" 
+           HorizontalOptions="Center" Margin="0,40,0,40"/>
+
+                    <Button Text="Masalar" Clicked="Masalar_Clicked"
+            BackgroundColor="#34495E" TextColor="White" HeightRequest="60" CornerRadius="10"/>
+
+                    <Button Text="Raporları Görüntüle" Clicked="Raporlar_Clicked"
+            BackgroundColor="#34495E" TextColor="White" HeightRequest="60" CornerRadius="10"/>
+
+                    <Button Text="Ayarlar ve Yönetim" Clicked="Ayarlar_Clicked"
+            BackgroundColor="#34495E" TextColor="White" HeightRequest="60" CornerRadius="10"/>
+
+                </VerticalStackLayout>
+                
+            </ScrollView>
+        </Border>
+
+        <ScrollView Grid.Column="1" BackgroundColor="#F5F6FA">
+            <VerticalStackLayout Padding="40" Spacing="30">
+
+                <Label Text="KAMPÜS BAHCE KAFE UYGULAMASI" 
+                       HorizontalOptions="Center" 
+                       FontSize="28" 
+                       FontAttributes="Bold" 
+                       TextColor="#2C3E50" />
+
+                <FlexLayout x:Name="MasaContainer" 
+                            Wrap="Wrap" 
+                            JustifyContent="SpaceEvenly" 
+                            AlignItems="Center" 
+                            AlignContent="Start" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

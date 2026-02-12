@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.SiparisPage"
+             xmlns:models="clr-namespace:KafesonApp.Models"
+             Title="Sipariş Paneli"
+             BackgroundColor="#F4F7F6">
+
+    <Grid ColumnDefinitions="200, *, 350">
+        
+        <ScrollView Grid.Column="0" BackgroundColor="#2C3E50" Padding="10">
+            <VerticalStackLayout x:Name="KategoriContainer" Spacing="5">
+                </VerticalStackLayout>
+        </ScrollView>
+
+        <ScrollView Grid.Column="1" Padding="15">
+            <FlexLayout x:Name="UrunlerContainer" 
+                        Wrap="Wrap" 
+                        JustifyContent="Start" 
+                        AlignContent="Start" 
+                        AlignItems="Start">
+                </FlexLayout>
+        </ScrollView>
+
+        <Grid Grid.Column="2" RowDefinitions="Auto, *, Auto" BackgroundColor="White" Padding="15">
+            
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                <Label Text="ADİSYON DETAYI" FontAttributes="Bold" FontSize="18" VerticalOptions="Center"/>
+                <Button Grid.Column="1" Text="Geri" Clicked="GeriDonTiklandi" BackgroundColor="#7F8C8D" HeightRequest="35"/>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="15">
+                    
+                    <Label Text="SEPET (MUTFAĞA GİTMEYENLER)" FontSize="12" TextColor="#E67E22" FontAttributes="Bold"/>
+                    <CollectionView ItemsSource="{Binding SecilenMasa.Sepet}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Urun">
+                                <Grid ColumnDefinitions="*, Auto, Auto" Padding="5">
+                                    <Label Text="{Binding Ad}" VerticalOptions="Center"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="10" Margin="0,0,10,0">
+                                        <Button Text="-" Clicked="SilTiklandi" CommandParameter="{Binding .}" WidthRequest="35" HeightRequest="35" Padding="0"/>
+                                        <Label Text="{Binding Miktar}" VerticalOptions="Center" FontAttributes="Bold"/>
+                                        <Button Text="+" Clicked="MiktarArtir_Clicked" CommandParameter="{Binding .}" WidthRequest="35" HeightRequest="35" Padding="0"/>
+                                    </HorizontalStackLayout>
+                                    <Label Grid.Column="2" Text="{Binding ToplamFiyat, StringFormat='{0:N2}'}" VerticalOptions="Center" FontAttributes="Bold"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <BoxView HeightRequest="1" Color="#BDC3C7"/>
+
+                    <Label Text="ONAYLI SİPARİŞLER" FontSize="12" TextColor="#27AE60" FontAttributes="Bold"/>
+                    <CollectionView ItemsSource="{Binding SecilenMasa.Siparisler}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Urun">
+                                <Grid ColumnDefinitions="30, *, Auto" Padding="5">
+                                    <Label Text="{Binding Miktar, StringFormat='{0}x'}" FontAttributes="Bold" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{Binding Ad}" VerticalOptions="Center"/>
+                                    <Label Grid.Column="2" Text="{Binding ToplamFiyat, StringFormat='{0:N2}'}" VerticalOptions="Center" Opacity="0.7"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <VerticalStackLayout Grid.Row="2" Spacing="10" Padding="0,15,0,0">
+                <BoxView HeightRequest="2" Color="#2C3E50"/>
+                <Grid ColumnDefinitions="*, Auto">
+                    <Label Text="TOPLAM TUTAR:" FontAttributes="Bold" FontSize="16" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" x:Name="ToplamLabel" Text="0.00 TL" FontSize="22" FontAttributes="Bold" TextColor="#2C3E50"/>
+                </Grid>
+                
+                <Button x:Name="AnaButon" 
+                        HeightRequest="65" 
+                        FontSize="18" 
+                        FontAttributes="Bold" 
+                        TextColor="White"
+                        CornerRadius="10"
+                        Clicked="AnaButon_Clicked"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

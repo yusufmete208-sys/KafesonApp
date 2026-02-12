@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.FiyatGuncellePage"
+             Title="Fiyat Güncelleme"
+             BackgroundColor="#F5F6FA">
+
+    <Grid RowDefinitions="Auto, *, Auto" RowSpacing="15" Padding="20">
+
+        <Frame Grid.Row="0" CornerRadius="15" HasShadow="True" Padding="15">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="TOPLU İŞLEMLER" FontAttributes="Bold" HorizontalOptions="Center" TextColor="#E67E22"/>
+                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                    <Entry x:Name="TopluZamEntry" Placeholder="Zam Oranı (%)" Keyboard="Numeric" Grid.Column="0"/>
+                    <Button Text="TÜMÜNE UYGULA" Clicked="TopluZamUygula_Clicked" BackgroundColor="#E67E22" Grid.Column="1"/>
+                </Grid>
+                <SearchBar x:Name="UrunAraCubugu" Placeholder="Ürün ara..." TextChanged="UrunAraCubugu_TextChanged" />
+            </VerticalStackLayout>
+        </Frame>
+
+        <CollectionView Grid.Row="1" x:Name="UrunCollectionView">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5" Padding="10" CornerRadius="10">
+                        <Grid ColumnDefinitions="*, 100, Auto" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                <Label Text="{Binding Ad}" FontAttributes="Bold" FontSize="16"/>
+                                <Label Text="{Binding Kategori}" FontSize="12" TextColor="Gray"/>
+                            </VerticalStackLayout>
+
+                            <Entry Grid.Column="1" Text="{Binding Fiyat}" Keyboard="Numeric" 
+                                   HorizontalTextAlignment="Center" VerticalOptions="Center" />
+
+                            <Label Grid.Column="2" Text="TL" VerticalOptions="Center" FontAttributes="Bold"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="2" Spacing="10">
+            <Button Text="DEĞİŞİKLİKLERİ KAYDET" Clicked="Kaydet_Clicked" 
+                    BackgroundColor="#27AE60" TextColor="White" HeightRequest="55" FontAttributes="Bold"/>
+            <Button Text="GERİ DÖN" Clicked="GeriDon_Clicked" BackgroundColor="#95A5A6" HeightRequest="45"/>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,97 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:KafesonApp.Models"
+             x:Class="KafesonApp.RaporPage"
+             Title="Finansal Analiz Paneli" BackgroundColor="#F0F2F5">
+
+    <Grid RowDefinitions="Auto, *" Padding="20">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="15" Margin="0,0,0,20">
+
+            <Grid ColumnDefinitions="Auto, *">
+                <Button Text="← GERİ DÖN" 
+                        Clicked="Geri_Clicked" 
+                        BackgroundColor="Transparent" 
+                        TextColor="#34495E" 
+                        FontAttributes="Bold"
+                        Padding="0"
+                        HorizontalOptions="Start"/>
+
+                <Label Grid.Column="1" 
+                       Text="KAFESON İŞLETME ÖZETİ" 
+                       FontSize="22" 
+                       FontAttributes="Bold" 
+                       TextColor="#2C3E50" 
+                       HorizontalOptions="Center"
+                       Margin="-100,0,0,0"/>
+            </Grid>
+
+            <Border StrokeShape="RoundRectangle 25" BackgroundColor="#E0E4E8" HorizontalOptions="Center" Padding="5">
+                <HorizontalStackLayout Spacing="5">
+                    <Button x:Name="BtnGun" Text="GÜNLÜK" Clicked="ModDegistir" CommandParameter="Gun" BackgroundColor="#34495E" CornerRadius="20" WidthRequest="100"/>
+                    <Button x:Name="BtnAy" Text="AYLIK" Clicked="ModDegistir" CommandParameter="Ay" BackgroundColor="Transparent" TextColor="#34495E" CornerRadius="20" WidthRequest="100"/>
+                    <Button x:Name="BtnYil" Text="YILLIK" Clicked="ModDegistir" CommandParameter="Yil" BackgroundColor="Transparent" TextColor="#34495E" CornerRadius="20" WidthRequest="100"/>
+                </HorizontalStackLayout>
+            </Border>
+
+            <DatePicker x:Name="RaporTarihSecici" DateSelected="TarihDegisti" HorizontalOptions="Center" Format="dd MMMM yyyy"/>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="20">
+
+                <Border BackgroundColor="#27AE60" StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="30">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,10" Opacity="0.1"/>
+                    </Border.Shadow>
+                    <VerticalStackLayout HorizontalOptions="Center">
+                        <Label x:Name="RaporBaslikLabel" Text="BUGÜNKÜ TOPLAM KAZANÇ" TextColor="#D1F2EB" FontSize="14" HorizontalOptions="Center"/>
+                        <Label x:Name="GunlukCiroLabel" Text="0,00 TL" FontSize="42" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                        <Label x:Name="GunlukAdetLabel" Text="0 İşlem Gerçekleşti" TextColor="White" Opacity="0.8" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid ColumnDefinitions="*, *, *" ColumnSpacing="15">
+                    <Border Grid.Column="0" BackgroundColor="White" Padding="15" StrokeShape="RoundRectangle 15">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="💵 NAKİT" FontSize="11" TextColor="Gray" HorizontalOptions="Center"/>
+                            <Label x:Name="NakitToplamLabel" Text="0,00" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" BackgroundColor="White" Padding="15" StrokeShape="RoundRectangle 15">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="💳 KART" FontSize="11" TextColor="Gray" HorizontalOptions="Center"/>
+                            <Label x:Name="KartToplamLabel" Text="0,00" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="2" BackgroundColor="White" Padding="15" StrokeShape="RoundRectangle 15">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="📊 ORT." FontSize="11" TextColor="Gray" HorizontalOptions="Center"/>
+                            <Label x:Name="OrtalamaAdisyonLabel" Text="0,00" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="20">
+                    <VerticalStackLayout Grid.Column="0" Spacing="10">
+                        <Label Text="🏆 LİDER ÜRÜNLER" FontAttributes="Bold" FontSize="15" TextColor="#34495E"/>
+                        <Border BackgroundColor="White" Padding="15" StrokeShape="RoundRectangle 15">
+                            <VerticalStackLayout x:Name="UrunStatContainer" Spacing="8"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="10">
+                        <Label Text="⏰ ZİRVE SAATLER" FontAttributes="Bold" FontSize="15" TextColor="#34495E"/>
+                        <Border BackgroundColor="White" Padding="15" StrokeShape="RoundRectangle 15">
+                            <VerticalStackLayout x:Name="SaatlikStatContainer" Spacing="8"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Button Text="RAPORU PAYLAŞ" Clicked="RaporPaylas_Clicked" 
+                        BackgroundColor="#2C3E50" TextColor="White" CornerRadius="15" HeightRequest="50"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

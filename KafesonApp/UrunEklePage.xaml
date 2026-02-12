@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.UrunEklePage"
+             Title="Ürün Yönetimi"
+             BackgroundColor="#F8F9FA">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="20">
+
+            <Label Text="YENİ ÜRÜN EKLE" 
+                   FontSize="26" 
+                   FontAttributes="Bold" 
+                   TextColor="#2C3E50"
+                   HorizontalOptions="Center" 
+                   Margin="0,10"/>
+
+            <Frame CornerRadius="15" HasShadow="True" BorderColor="#DDE1E3">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Kategori Seçimi" FontAttributes="Bold" TextColor="#34495E"/>
+
+                    <Label Text="Mevcut Kategorilerden Seç:" FontSize="12" TextColor="Gray"/>
+                    <Picker x:Name="KategoriPicker" 
+                            Title="Bir kategori seçin" 
+                            TextColor="#2C3E50"/>
+
+                    <BoxView HeightRequest="1" Color="#F0F0F0" Margin="0,5"/>
+
+                    <Label Text="Veya Yeni Kategori Oluştur:" FontSize="12" TextColor="Gray"/>
+                    <Entry x:Name="YeniKategoriEntry" 
+                           Placeholder="Örn: Tatlılar, Soğuk İçecekler"
+                           TextColor="#2C3E50"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame CornerRadius="15" HasShadow="True" BorderColor="#DDE1E3">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Ürün Detayları" FontAttributes="Bold" TextColor="#34495E"/>
+
+                    <Label Text="Ürün Adı" FontSize="12" TextColor="Gray"/>
+                    <Entry x:Name="UrunAdiEntry" 
+                           Placeholder="Örn: Filtre Kahve"
+                           TextColor="#2C3E50"/>
+
+                    <Label Text="Satış Fiyatı (TL)" FontSize="12" TextColor="Gray"/>
+                    <Entry x:Name="FiyatEntry" 
+                           Placeholder="Örn: 85" 
+                           Keyboard="Numeric"
+                           TextColor="#2C3E50"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <VerticalStackLayout Spacing="12" HorizontalOptions="Center" Margin="0,20">
+
+                <Button Text="ÜRÜNÜ SİSTEME KAYDET" 
+                        Clicked="UrunKaydet_Clicked" 
+                        BackgroundColor="#27AE60" 
+                        TextColor="White" 
+                        HeightRequest="45" 
+                        WidthRequest="250" 
+                        CornerRadius="10" 
+                        FontAttributes="Bold"/>
+
+                <Button Text="Ürün Sil" 
+                        Clicked="UrunSil_Clicked"
+                        BackgroundColor="#E67E22" 
+                        TextColor="White" 
+                        HeightRequest="45" 
+                        WidthRequest="250" 
+                        CornerRadius="10"/>
+
+                <Button Text="Ürünleri Görüntüle" 
+                        Clicked="UrunleriGoruntule_Clicked"
+                        BackgroundColor="#2980B9" 
+                        TextColor="White" 
+                        HeightRequest="45" 
+                        WidthRequest="250" 
+                        CornerRadius="10"/>
+
+               
+
+                <Button Text="Ayarlara Geri Dön" 
+        Clicked="AyarlaraDon_Clicked"
+        BackgroundColor="#95A5A6" 
+        WidthRequest="250" 
+        Margin="0,20,0,0"/>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

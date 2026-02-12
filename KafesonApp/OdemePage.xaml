@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.OdemePage"
+             xmlns:models="clr-namespace:KafesonApp.Models"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+            <VerticalStackLayout HorizontalOptions="Center" Spacing="2">
+                <Label Text="{Binding No, StringFormat='Masa {0}'}" 
+                       FontSize="28" FontAttributes="Bold" TextColor="#2C3E50"/>
+                <Label Text="{Binding KalanTutar, StringFormat='Kalan Borç: {0:N2} TL'}" 
+                       TextColor="#7F8C8D" FontSize="14"/>
+            </VerticalStackLayout>
+            <Button Grid.Column="1" Text="X" BackgroundColor="Transparent" 
+                    TextColor="#34495E" FontSize="24" Clicked="Kapat_Clicked"/>
+        </Grid>
+
+        <VerticalStackLayout Grid.Row="1" Margin="0,20" Spacing="15">
+
+            <Frame BackgroundColor="#F8F9FA" HasShadow="False" CornerRadius="15" Padding="20">
+                <Label x:Name="OdenecekTutarLabel" 
+                       Text="0,00" 
+                       FontSize="48" 
+                       FontAttributes="Bold" 
+                       HorizontalOptions="Center" 
+                       TextColor="#2C3E50"/>
+            </Frame>
+
+            <Label Text="Ödenecek Ürünleri Seçin" FontAttributes="Bold" TextColor="#34495E" Margin="5,0"/>
+
+            <CollectionView ItemsSource="{Binding Siparisler}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Urun">
+                        <Grid ColumnDefinitions="40, 50, *, Auto, 60, Auto" Padding="10">
+                            <CheckBox IsChecked="{Binding IsSecili}" Color="#F1C40F" CheckedChanged="SecimDegisti"/>
+
+                            <Button Grid.Column="1" Text="1" BackgroundColor="#F1C40F" TextColor="Black" 
+                        Clicked="HizliMiktar_Clicked" CommandParameter="{Binding .}"/>
+
+                            <Label Grid.Column="2" Text="{Binding Ad}" FontSize="18" VerticalOptions="Center" Margin="10,0"/>
+
+                            <Button Grid.Column="3" Text="-" Clicked="OdenenMiktarAzalt_Clicked" CommandParameter="{Binding .}"/>
+
+                            <VerticalStackLayout Grid.Column="4" VerticalOptions="Center">
+                                <Label Text="{Binding OdenecekAdet}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                <Label Text="{Binding Miktar, StringFormat='/{0}'}" FontSize="12" TextColor="Gray" HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="5" Text="+" Clicked="OdenenMiktarArtir_Clicked" CommandParameter="{Binding .}"/>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10">
+            <Button Grid.Column="0" Text="NAKİT" 
+                    BackgroundColor="#F1C40F" TextColor="Black" 
+                    FontAttributes="Bold" HeightRequest="70" CornerRadius="12"
+                    Clicked="OdemeYap_Clicked" CommandParameter="Nakit"/>
+
+            <Button Grid.Column="1" Text="KREDİ KARTI" 
+                    BackgroundColor="#E67E22" TextColor="White" 
+                    FontAttributes="Bold" HeightRequest="70" CornerRadius="12"
+                    Clicked="OdemeYap_Clicked" CommandParameter="Kart"/>
+        </Grid>
+
+    </Grid>
+</ContentPage>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.MasalarPage"
+             Title="Salon Kat Planı"
+             BackgroundColor="#F4F7F6">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label Text="KAFESON SALON PLANI" 
+                   FontSize="28" 
+                   FontAttributes="Bold" 
+                   TextColor="#2C3E50" 
+                   HorizontalOptions="Center" 
+                   Margin="0,10,0,20"/>
+
+            <FlexLayout x:Name="MasalarContainer" 
+            Wrap="Wrap" 
+            JustifyContent="Center" 
+            AlignItems="Center" 
+            AlignContent="Start"
+            MinimumHeightRequest="500">
+            </FlexLayout>
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20" Margin="0,20,0,10">
+                <HorizontalStackLayout Spacing="5">
+                    <BoxView Color="#2ECC71" WidthRequest="15" HeightRequest="15" CornerRadius="3"/>
+                    <Label Text="Boş" FontSize="12"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="5">
+                    <BoxView Color="#E74C3C" WidthRequest="15" HeightRequest="15" CornerRadius="3"/>
+                    <Label Text="Dolu" FontSize="12"/>
+                </HorizontalStackLayout>
+            </HorizontalStackLayout>
+
+            <Button Text="ANA MENÜYE GİT" 
+        Clicked="AnaMenuyeGit_Clicked"
+        BackgroundColor="#34495E" 
+        TextColor="White" 
+        CornerRadius="20"
+        HeightRequest="50"
+        WidthRequest="200"
+        HorizontalOptions="Center"
+        Margin="0,20"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
