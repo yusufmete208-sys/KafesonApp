@@ -1,55 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KafesonApp.AyarlarPage"
              Title="Yönetim Paneli"
              BackgroundColor="#F4F7F6">
 
+    <ContentPage.Resources>
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="#5E35B1"/>
+            <Setter Property="TextColor" Value="White"/>
+            <Setter Property="HorizontalOptions" Value="Fill"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="HeightRequest" Value="50"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,2"/>
+        </Style>
+    </ContentPage.Resources>
+
     <Grid ColumnDefinitions="250, *">
 
         <Border Grid.Column="0" BackgroundColor="#2C3E50" StrokeThickness="0">
-            <VerticalStackLayout Padding="15" Spacing="10">
+            <VerticalStackLayout Spacing="10" Padding="15">
 
                 <Label Text="YÖNETİM" 
                        TextColor="White" 
+                       FontSize="20" 
                        FontAttributes="Bold" 
-                       FontSize="22" 
-                       Margin="0,10,0,30" 
-                       HorizontalOptions="Center"/>
+                       HorizontalOptions="Center" 
+                       Margin="0,10,0,20"/>
 
-                <Button Text="📦 Yeni Ürün Ekle" 
+                <Button Text="Menü Listesi" 
+                        CommandParameter="MenuListesi" 
                         Clicked="MenuSec_Clicked" 
-                        CommandParameter="UrunEkle" 
                         Style="{StaticResource MenuButtonStyle}"/>
 
-                <Button Text="📋 Ürün Listesi" 
+                <Button Text="Yeni Ürün Kayıt" 
+                        CommandParameter="YeniKayit" 
                         Clicked="MenuSec_Clicked" 
-                        CommandParameter="UrunListesi" 
                         Style="{StaticResource MenuButtonStyle}"/>
 
-                <Button Text="🏷️ Fiyat Güncelle" 
-                        Clicked="MenuSec_Clicked" 
+                <Button Text="Fiyat Ayarları" 
                         CommandParameter="FiyatGuncelle" 
+                        Clicked="MenuSec_Clicked" 
                         Style="{StaticResource MenuButtonStyle}"/>
 
-                <Button Text="🪑 Masa Düzeni" 
-                        Clicked="MenuSec_Clicked" 
+                <Button Text="Masa Düzeni" 
                         CommandParameter="MasaDuzenle" 
-                        Style="{StaticResource MenuButtonStyle}"/>
-
-                <Button Text="👥 Personel" 
                         Clicked="MenuSec_Clicked" 
-                        CommandParameter="Personel" 
                         Style="{StaticResource MenuButtonStyle}"/>
 
-                <BoxView HeightRequest="1" Color="Gray" Margin="0,20"/>
+                <BoxView HeightRequest="1" Color="Gray" Margin="0,15"/>
 
                 <Button Text="🏠 Ana Menüye Dön" 
-                        Clicked="AnaSayfaDon_Clicked" 
+                        CommandParameter="Geri" 
+                        Clicked="MenuSec_Clicked" 
                         BackgroundColor="#E74C3C" 
                         TextColor="White" 
-                        CornerRadius="8"
-                        HeightRequest="50"
-                        FontAttributes="Bold"/>
+                        HeightRequest="50" 
+                        CornerRadius="8"/>
             </VerticalStackLayout>
         </Border>
 
@@ -59,23 +67,14 @@
                 <Label Text="Yönetim Paneline Hoş Geldiniz" 
                        FontSize="24" 
                        FontAttributes="Bold" 
-                       TextColor="#34495E"/>
+                       TextColor="#34495E"
+                       HorizontalOptions="Center"/>
                 <Label Text="İşlem yapmak için soldaki menüyü kullanın." 
                        FontSize="16" 
-                       TextColor="Gray"/>
+                       TextColor="Gray"
+                       HorizontalOptions="Center"/>
             </VerticalStackLayout>
         </ContentView>
 
     </Grid>
-
-    <ContentPage.Resources>
-        <Style x:Key="MenuButtonStyle" TargetType="Button">
-            <Setter Property="BackgroundColor" Value="Transparent"/>
-            <Setter Property="TextColor" Value="White"/>
-            <Setter Property="HorizontalOptions" Value="Fill"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="HeightRequest" Value="50"/>
-            <Setter Property="CornerRadius" Value="5"/>
-        </Style>
-    </ContentPage.Resources>
 </ContentPage>

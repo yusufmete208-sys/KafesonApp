@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.MenuGosterimView">
+    <Grid Padding="15">
+        <CollectionView x:Name="MenuCollectionView" IsGrouped="True">
+
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Baslik}" 
+                           FontSize="20" 
+                           FontAttributes="Bold" 
+                           TextColor="#E67E22" 
+                           Padding="10,15,10,5"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5" Padding="15" CornerRadius="12" BorderColor="#DCDDE1" HasShadow="False">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="{Binding Ad}" FontSize="16" VerticalOptions="Center" TextColor="#2F3640"/>
+                            <Label Grid.Column="1" Text="{Binding Fiyat, StringFormat='{0:N2} TL'}" 
+                                   FontAttributes="Bold" TextColor="#27AE60"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.EmptyView>
+                <Label Text="Henüz ürün bulunmuyor." HorizontalOptions="Center" VerticalOptions="Center" TextColor="Gray"/>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </Grid>
+</ContentView>

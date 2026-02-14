@@ -12,36 +12,39 @@ public partial class AyarlarPage : ContentPage
 
     private async void MenuSec_Clicked(object sender, EventArgs e)
     {
-        var btn = (Button)sender;
+        // Test amaçlý bu satýrý ekle. Eðer bu mesaj geliyorsa buton çalýþýyor demektir.
+        // await DisplayAlert("Test", "Butona basýldý!", "Tamam");
 
-        // Týklanan butonun parametresi boþsa iþlem yapma
-        if (btn.CommandParameter == null) return;
+        if (sender is not Button btn || btn.CommandParameter == null) return;
 
         string secim = btn.CommandParameter.ToString();
 
-        // Sað taraftaki içeriði deðiþtiriyoruz
-        // NOT: Eðer 'UrunEklePage' altý çizili kýrmýzýysa, o sayfanýn isminin doðru olduðundan emin olun.
-        switch (secim)
+        try
         {
-            case "UrunEkle":
-                ContentArea.Content = new UrunEklePage().Content;
-                break;
-
-            case "UrunListesi":
-                ContentArea.Content = new UrunListesiPage().Content;
-                break;
-
-            case "FiyatGuncelle":
-                ContentArea.Content = new FiyatGuncellePage().Content;
-                break;
-
-            case "MasaDuzenle":
-                ContentArea.Content = new MasaYonetimiPage().Content;
-                break;
-
-            case "Personel":
-                await DisplayAlert("Bilgi", "Personel yetkilendirme ekraný yakýnda eklenecek.", "Tamam");
-                break;
+            switch (secim)
+            {
+                case "MenuListesi":
+                    ContentArea.Content = new MenuGosterimView();
+                    break;
+                    
+                case "YeniKayit":
+                    ContentArea.Content = new YeniUrunKayitView();
+                    break;
+                case "MasaDuzenle":
+                    ContentArea.Content = new MasaYonetimView();
+                    break;
+                case "FiyatGuncelle": // XAML'daki CommandParameter ile ayný olmalý
+                                      // Yeni oluþturduðumuz FiyatRevizeView'ý buraya baðlýyoruz
+                    ContentArea.Content = new FiyatRevizeView();
+                    break;
+                case "Geri":
+                    await Navigation.PopAsync();
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Hata", "Görünüm yüklenemedi: " + ex.Message, "Tamam");
         }
     }
 

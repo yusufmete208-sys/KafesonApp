@@ -6,9 +6,22 @@ namespace KafesonApp.Models
     public class Urun : INotifyPropertyChanged
     {
         public string Ad { get; set; } = string.Empty;
-        public double Fiyat { get; set; }
+        
         public string Kategori { get; set; } = string.Empty; // CS0117/CS1061 HATASINI ÇÖZER
         public bool IsSecili { get; set; }
+
+        private double _fiyat;
+        public double Fiyat
+        {
+            get => _fiyat;
+            set
+            {
+                _fiyat = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ToplamFiyat));
+            }
+        }
+
 
         private int _miktar; // Adisyondaki miktar (Örn: 4)
         public int Miktar
