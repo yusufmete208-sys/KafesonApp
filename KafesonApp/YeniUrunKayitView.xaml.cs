@@ -85,7 +85,34 @@ public partial class YeniUrunKayitView : ContentView
 
     private async void OnYeniKategoriClicked(object sender, EventArgs e)
     {
-        string result = await Application.Current.MainPage.DisplayPromptAsync("Yeni Kategori", "Adý:");
-        if (!string.IsNullOrWhiteSpace(result)) { KategorileriOlustur(); }
+        string result = await Application.Current.MainPage.DisplayPromptAsync("Yeni Kategori", "Kategori Adý Giriniz:");
+
+        if (!string.IsNullOrWhiteSpace(result))
+        {
+            // Mevcut listede bu isimde bir kategori olup olmadýðýný kontrol et
+            bool varMi = App.Urunler.Any(u => u.Kategori.Equals(result, StringComparison.OrdinalIgnoreCase));
+
+            if (!varMi)
+            {
+                // Yeni kategorinin butonlarda gözükmesi için bu kategoride 'geçici' bir ürün eklemeliyiz 
+                // Çünkü 'KategorileriOlustur' metodu App.Urunler listesindeki 'Distinct' kategorileri çeker.
+                App.Urunler.Add(new Urun
+                {
+                    Ad = "Yeni Kategori Örneði",
+                    Kategori = result,
+                    Fiyat = 0,
+                    Miktar = 0
+                });
+
+                App.VerileriKaydet(); // Veriyi kalýcý hale getir
+                KategorileriOlustur(); // Buton listesini yenile
+
+                await Application.Current.MainPage.DisplayAlert("Baþarýlý", $"{result} kategorisi eklendi.", "Tamam");
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Uyarý", "Bu kategori zaten mevcut!", "Tamam");
+            }
+        }
     }
 }
