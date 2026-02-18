@@ -8,6 +8,8 @@ public partial class App : Application
 {
     // 1. STATİK LİSTELER: Tüm sayfalardan erişilebilen ortak hafıza
     public static ObservableCollection<Masa> Masalar { get; set; } = new();
+
+    public static ObservableCollection<Satis> KapananMasalar { get; set; } = new();
     public static ObservableCollection<Urun> Urunler { get; set; } = new();
     public static ObservableCollection<SatisRaporu> SatisRaporlari { get; set; } = new();
 

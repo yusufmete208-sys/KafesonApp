@@ -26,8 +26,16 @@ public partial class MasalarPage : ContentPage
 
         foreach (var masa in siraliMasalar)
         {
-            // Metni sadece Masa No ve Durum olarak ayarlýyoruz
-            string butonMetni = $"Masa {masa.No}\n{(masa.IsDolu ? "DOLU" : "BOÞ")}";
+            // --- SÜRE HESAPLAMA ---
+            string sureMetni = "";
+            if (masa.IsDolu && masa.AcilisZamani.HasValue)
+            {
+                var gecenSure = DateTime.Now - masa.AcilisZamani.Value;
+                sureMetni = $"\n{(int)gecenSure.TotalMinutes} dk";
+            }
+
+            // Metne süre bilgisini ekliyoruz
+            string butonMetni = $"Masa {masa.No}\n{(masa.IsDolu ? "DOLU" : "BOÞ")}{sureMetni}";
 
             var masaButonu = new Button
             {
@@ -38,7 +46,6 @@ public partial class MasalarPage : ContentPage
                 CornerRadius = 20,
                 FontSize = 18,
                 FontAttributes = FontAttributes.Bold,
-                // Doluysa Kýrmýzý, Boþsa Yeþil renk mantýðý devam ediyor
                 BackgroundColor = masa.IsDolu ? Color.FromArgb("#FF0000") : Color.FromArgb("#008000"),
                 TextColor = Colors.White
             };
@@ -75,4 +82,7 @@ public partial class MasalarPage : ContentPage
     {
         await Navigation.PopAsync(); //
     }
+
+
+
 }

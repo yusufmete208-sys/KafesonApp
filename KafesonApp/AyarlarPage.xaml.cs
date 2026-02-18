@@ -37,9 +37,14 @@ public partial class AyarlarPage : ContentPage
                                       // Yeni oluþturduðumuz FiyatRevizeView'ý buraya baðlýyoruz
                     ContentArea.Content = new FiyatRevizeView();
                     break;
+                case "KapananMasalar":
+                    ContentArea.Content = new KapananMasalar1View();
+                    break;
+
                 case "Geri":
                     await Navigation.PopAsync();
                     break;
+
             }
         }
         catch (Exception ex)
@@ -53,4 +58,6 @@ public partial class AyarlarPage : ContentPage
         // Bir önceki sayfaya (MainPage) geri döner
         await Navigation.PopAsync();
     }
+
+   
 }

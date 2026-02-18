@@ -78,6 +78,9 @@
 	  <MauiXaml Update="FiyatRevizeView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="KapananMasalar1View.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="MasalarPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

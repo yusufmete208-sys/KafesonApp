@@ -1,44 +1,76 @@
-﻿using System.ComponentModel; //
-using System.Runtime.CompilerServices; //
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace KafesonApp.Models
 {
     public class Urun : INotifyPropertyChanged
     {
+        // Ürün Adı
         public string Ad { get; set; } = string.Empty;
-        
-        public string Kategori { get; set; } = string.Empty; // CS0117/CS1061 HATASINI ÇÖZER
-        public bool IsSecili { get; set; }
 
+        // Kategori (Filtreleme ve gruplama için gerekli)
+        public string Kategori { get; set; } = string.Empty;
+
+        // Seçim kutucukları için (Checkbox)
+        private bool _isSecili;
+        public bool IsSecili
+        {
+            get => _isSecili;
+            set { _isSecili = value; OnPropertyChanged(); }
+        }
+
+        // FİYAT
         private double _fiyat;
         public double Fiyat
         {
             get => _fiyat;
             set
             {
-                _fiyat = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ToplamFiyat));
+                if (_fiyat != value)
+                {
+                    _fiyat = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ToplamFiyat)); // Fiyat değişirse toplamı güncelle
+                }
             }
         }
 
-
-        private int _miktar; // Adisyondaki miktar (Örn: 4)
+        // MİKTAR (Adisyondaki adet)
+        private int _miktar;
         public int Miktar
         {
             get => _miktar;
-            set { _miktar = value; OnPropertyChanged(); OnPropertyChanged(nameof(ToplamFiyat)); }
+            set
+            {
+                if (_miktar != value)
+                {
+                    _miktar = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ToplamFiyat)); // Miktar değişirse toplamı güncelle
+                }
+            }
         }
 
-        private int _odenecekAdet; // Ödeme ekranında seçilen (Örn: 2)
+        // ÖDEME EKRANI İÇİN (Parçalı ödeme vb.)
+        private int _odenecekAdet;
         public int OdenecekAdet
         {
             get => _odenecekAdet;
-            set { _odenecekAdet = value; OnPropertyChanged(); }
+            set
+            {
+                if (_odenecekAdet != value)
+                {
+                    _odenecekAdet = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
+        // TOPLAM FİYAT (Otomatik Hesaplanır)
+        // Hatalı kısmı düzelttim:
         public double ToplamFiyat => Fiyat * Miktar;
 
+        // --- INotifyPropertyChanged Uygulaması (Arayüz güncellemesi için şart) ---
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

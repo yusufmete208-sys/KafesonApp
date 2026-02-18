@@ -1,27 +1,63 @@
-﻿using System.Collections.ObjectModel; // ObservableCollection için
+﻿using System;
+using System.Collections.ObjectModel; // ObservableCollection için
 using System.ComponentModel; // INotifyPropertyChanged için
 using System.Runtime.CompilerServices; // CallerMemberName için
-using System.Linq; // .Sum() hesaplaması için ŞART
+using System.Linq; // .Sum() hesaplaması için
 
 namespace KafesonApp.Models
 {
     public class Masa : INotifyPropertyChanged
     {
+        private bool _isDolu;
+        private double _odenmisTutar;
+        private DateTime? _acilisZamani;
+
         public int No { get; set; }
 
-        // CS1061 hatasını bu iki satır çözer
-        public bool IsDolu { get; set; }
-        public double OdenmisTutar { get; set; }
+        public bool IsDolu
+        {
+            get => _isDolu;
+            set { _isDolu = value; OnPropertyChanged(); OnPropertyChanged(nameof(GecenSure)); }
+        }
+
+        public double OdenmisTutar
+        {
+            get => _odenmisTutar;
+            set { _odenmisTutar = value; OnPropertyChanged(); }
+        }
+
+        // Masanın açıldığı anı tutan alan
+        public DateTime? AcilisZamani
+        {
+            get => _acilisZamani;
+            set { _acilisZamani = value; OnPropertyChanged(); OnPropertyChanged(nameof(GecenSure)); }
+        }
 
         public ObservableCollection<Urun> Siparisler { get; set; } = new();
         public ObservableCollection<Urun> Sepet { get; set; } = new();
 
-        // Negatif bakiye hatasını (image_87389e) bu mantık çözer: 
-        // Kalan borç, sadece o an listede duran ürünlerin toplamıdır.
-        public double KalanTutar => Siparisler.Sum(x => x.Fiyat * x.Miktar);
+        // Kalan borç hesabı: Siparişlerin toplamından ödenmiş tutarı düşer
+        public double KalanTutar => Siparisler.Sum(x => x.Fiyat * x.Miktar) - OdenmisTutar;
+
+        // Masanın ne kadar süredir açık olduğunu hesaplayan özellik
+        public string GecenSure
+        {
+            get
+            {
+                if (AcilisZamani == null || !IsDolu) return "";
+                var fark = DateTime.Now - AcilisZamani.Value;
+                return $"{(int)fark.TotalMinutes} dk";
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null) =>
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+            // Siparişler veya ödenen tutar değiştiğinde KalanTutar'ı da güncelle
+            if (name == nameof(OdenmisTutar))
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(KalanTutar)));
+        }
     }
 }

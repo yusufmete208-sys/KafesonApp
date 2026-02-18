@@ -84,17 +84,16 @@ public partial class SiparisPage : ContentPage
             };
 
             btn.Clicked += (s, e) => {
-                // 1. AYNI ÜRÜN SEPETTE VAR MI KONTROL ET
-                var mevcutUrun = SecilenMasa.Sepet.FirstOrDefault(x => x.Ad == urun.Ad);
+                // 1. ADIM: SEPETTE ÜRÜN VAR MI KONTROL ET
+                var sepettekiUrun = SecilenMasa.Sepet.FirstOrDefault(x => x.Ad == urun.Ad);
 
-                if (mevcutUrun != null)
+                if (sepettekiUrun != null)
                 {
-                    // Varsa miktarýný artýr (Yeni satýr açmaz)
-                    mevcutUrun.Miktar++;
+                    sepettekiUrun.Miktar++; // Varsa miktar artýr
                 }
                 else
                 {
-                    // Yoksa yeni bir satýr olarak ekle
+                    // Yoksa yeni ekle
                     SecilenMasa.Sepet.Add(new Urun { Ad = urun.Ad, Fiyat = urun.Fiyat, Miktar = 1 });
                 }
                 DurumuGuncelle();
@@ -103,16 +102,38 @@ public partial class SiparisPage : ContentPage
         }
     }
 
-    // --- BUTON OLAYLARI (Event Handlers) ---
-
+    // SiparisPage.xaml.cs içindeki AnaButon_Clicked metodunu güncelle
     private async void AnaButon_Clicked(object sender, EventArgs e)
     {
-        // 1. DURUM: SEPETÝ ONAYLA
+        // 1. DURUM: SEPETTE SÝPARÝÞ VARSA (MUTFAÐA GÖNDER)
         if (SecilenMasa.Sepet.Count > 0)
         {
-            foreach (var urun in SecilenMasa.Sepet)
+            // Masa yeni açýlýyorsa saatini baþlat
+            if (SecilenMasa.AcilisZamani == null)
             {
-                SecilenMasa.Siparisler.Add(urun);
+                SecilenMasa.AcilisZamani = DateTime.Now;
+            }
+
+            foreach (var urun in SecilenMasa.Sepet.ToList())
+            {
+                // Ayný ürün masada varsa üstüne ekle (Satýr birleþtirme)
+                var mevcutUrun = SecilenMasa.Siparisler.FirstOrDefault(x => x.Ad == urun.Ad);
+                if (mevcutUrun != null)
+                {
+                    mevcutUrun.Miktar += urun.Miktar;
+                }
+                else
+                {
+                    // Yoksa yeni olarak ekle
+                    SecilenMasa.Siparisler.Add(new Urun
+                    {
+                        Ad = urun.Ad,
+                        Fiyat = urun.Fiyat,
+                        Miktar = urun.Miktar
+                    });
+                }
+
+                // Mutfak listesine ekle
                 App.MutfakSiparisleri.Add(new MutfakSiparisi
                 {
                     MasaNo = SecilenMasa.No,
@@ -120,24 +141,62 @@ public partial class SiparisPage : ContentPage
                     Miktar = urun.Miktar
                 });
             }
+
+            // Sepeti temizle ve masayý dolu yap
             SecilenMasa.Sepet.Clear();
             SecilenMasa.IsDolu = true;
+
             App.VerileriKaydet();
+            await DisplayAlert("Baþarýlý", "Sipariþler mutfaða iletildi.", "Tamam");
         }
-        // 2. DURUM: ÖDEME AL
-        else if (SecilenMasa.KalanTutar > 0)
+
+        // 2. DURUM: SEPET BOÞ AMA BORÇ VAR (ÖDEME AL)
+        else if (SecilenMasa.KalanTutar > 0.01)
         {
             await Navigation.PushModalAsync(new OdemePage(SecilenMasa));
         }
-        // 3. DURUM: HESABI KAPAT
+
+        // 3. DURUM: BORÇ BÝTTÝ (HESABI KAPAT VE ARÞÝVLE)
         else
         {
+            // --- KRÝTÝK NOKTA: ÜRÜNLERÝN BAÐIMSIZ KOPYASINI AL ---
+            // Bu iþlem yapýlmazsa, masa sýfýrlandýðýnda arþivdeki ürünler de silinir!
+            var urunKopyalari = SecilenMasa.Siparisler.Select(u => new Urun
+            {
+                Ad = u.Ad,
+                Fiyat = u.Fiyat,
+                Miktar = u.Miktar
+            }).ToList();
+
+            // Toplam tutarý kopyalanan ürünlerden hesapla (Hata payý sýfýr)
+            double hesaplananToplam = urunKopyalari.Sum(x => x.Fiyat * x.Miktar);
+
+            // Yeni satýþ kaydý oluþtur
+            var yeniSatis = new Satis
+            {
+                MasaNo = SecilenMasa.No,
+                AcilisZamani = SecilenMasa.AcilisZamani,
+                KapanisZamani = DateTime.Now,
+                ToplamTutar = hesaplananToplam,
+                Urunler = urunKopyalari // Kopyalanmýþ listeyi veriyoruz
+            };
+
+            // Kapanan masalar listesinin en baþýna ekle
+            App.KapananMasalar.Insert(0, yeniSatis);
+
+            // ÞÝMDÝ MASAYI GÜVENLE SIFIRLA
+            SecilenMasa.AcilisZamani = null;
             SecilenMasa.IsDolu = false;
             SecilenMasa.Siparisler.Clear();
             SecilenMasa.OdenmisTutar = 0;
+
+            // Verileri telefona kaydet
             App.VerileriKaydet();
-            await Navigation.PopAsync(); // Çökmeyi önleyen tekil navigasyon
+
+            await DisplayAlert("Hesap Kapandý", "Masa arþive eklendi.", "Tamam");
+            await Navigation.PopAsync();
         }
+
         DurumuGuncelle();
     }
 
@@ -157,6 +216,90 @@ public partial class SiparisPage : ContentPage
             DurumuGuncelle();
         }
     }
+    // MASA AKTAR BUTONU
+    private async void MasaAktar_Clicked(object sender, EventArgs e)
+    {
+        // _masa yerine SecilenMasa kullanýyoruz
+        if (SecilenMasa == null || !SecilenMasa.IsDolu)
+        {
+            await DisplayAlert("Uyarý", "Aktarýlacak sipariþ bulunamadý.", "Tamam");
+            return;
+        }
+
+        // Boþ masalarý bul (App.Masalar üzerinden)
+        var bosMasalar = App.Masalar.Where(m => !m.IsDolu).Select(m => $"Masa {m.No}").ToArray();
+
+        if (bosMasalar.Length == 0)
+        {
+            await DisplayAlert("Hata", "Aktarýlacak boþ masa bulunamadý.", "Tamam");
+            return;
+        }
+
+        string secim = await DisplayActionSheet("Hedef Masayý Seçin", "Ýptal", null, bosMasalar);
+
+        if (secim != "Ýptal" && !string.IsNullOrEmpty(secim))
+        {
+            int hedefNo = int.Parse(secim.Replace("Masa ", ""));
+            var hedefMasa = App.Masalar.First(m => m.No == hedefNo);
+
+            // Sipariþleri taþý
+            foreach (var urun in SecilenMasa.Siparisler.ToList())
+            {
+                hedefMasa.Siparisler.Add(urun);
+            }
+
+            hedefMasa.IsDolu = true;
+            SecilenMasa.Siparisler.Clear();
+            SecilenMasa.IsDolu = false;
+
+            App.VerileriKaydet(); // Deðiþiklikleri kalýcý hale getir
+            await DisplayAlert("Baþarýlý", $"Sipariþler Masa {hedefNo} konumuna aktarýldý.", "Tamam");
+            await Navigation.PopAsync();
+        }
+    }
+
+    // MASA BÝRLEÞTÝR BUTONU
+    private async void MasaBirlestir_Clicked(object sender, EventArgs e)
+    {
+        if (SecilenMasa == null || !SecilenMasa.IsDolu) return;
+
+        // Diðer dolu masalarý bul
+        var doluMasalar = App.Masalar
+            .Where(m => m.IsDolu && m.No != SecilenMasa.No)
+            .Select(m => $"Masa {m.No}")
+            .ToArray();
+
+        if (doluMasalar.Length == 0)
+        {
+            await DisplayAlert("Bilgi", "Birleþtirilecek baþka dolu masa yok.", "Tamam");
+            return;
+        }
+
+        string secim = await DisplayActionSheet("Hangi Masa ile Birleþtirilsin?", "Ýptal", null, doluMasalar);
+
+        if (secim != "Ýptal" && !string.IsNullOrEmpty(secim))
+        {
+            int hedefNo = int.Parse(secim.Replace("Masa ", ""));
+            var hedefMasa = App.Masalar.First(m => m.No == hedefNo);
+
+            foreach (var urun in SecilenMasa.Siparisler.ToList())
+            {
+                var mevcut = hedefMasa.Siparisler.FirstOrDefault(x => x.Ad == urun.Ad);
+                if (mevcut != null)
+                    mevcut.Miktar += urun.Miktar;
+                else
+                    hedefMasa.Siparisler.Add(urun);
+            }
+
+            SecilenMasa.Siparisler.Clear();
+            SecilenMasa.IsDolu = false;
+
+            App.VerileriKaydet(); // Deðiþiklikleri kalýcý hale getir
+            await DisplayAlert("Baþarýlý", $"Masalar Masa {hedefNo} altýnda birleþtirildi.", "Tamam");
+            await Navigation.PopAsync();
+        }
+    }
+
 
     private async void GeriDonTiklandi(object sender, EventArgs e) => await Navigation.PopAsync();
 }

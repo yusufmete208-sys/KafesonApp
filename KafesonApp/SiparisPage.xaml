@@ -80,6 +80,30 @@
                         TextColor="White"
                         CornerRadius="10"
                         Clicked="AnaButon_Clicked"/>
+
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" Margin="0,10">
+
+
+
+
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="AKTAR" 
+                Clicked="MasaAktar_Clicked"
+                BackgroundColor="#2196F3" 
+                TextColor="White"
+                FontAttributes="Bold"
+                HeightRequest="50"
+                WidthRequest="120" />
+
+                        <Button Text="BİRLEŞTİR" 
+                Clicked="MasaBirlestir_Clicked"
+                BackgroundColor="#9C27B0" 
+                TextColor="White"
+                FontAttributes="Bold"
+                HeightRequest="50"
+                WidthRequest="120" />
+                    </HorizontalStackLayout>
+                </HorizontalStackLayout>
             </VerticalStackLayout>
         </Grid>
     </Grid>
