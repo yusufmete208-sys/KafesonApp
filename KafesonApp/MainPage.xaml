@@ -21,6 +21,13 @@
 
                     <Button Text="Ayarlar ve Yönetim" Clicked="Ayarlar_Clicked"
             BackgroundColor="#34495E" TextColor="White" HeightRequest="60" CornerRadius="10"/>
+                    <Button Text="Kapanan Masalar" 
+                            Clicked="KapananMasalar_Clicked"
+                            BackgroundColor="#34495E" 
+                            TextColor="White" 
+                            HeightRequest="60" 
+                            CornerRadius="10"/>
+
 
                 </VerticalStackLayout>
                 

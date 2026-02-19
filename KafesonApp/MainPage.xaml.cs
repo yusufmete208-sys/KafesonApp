@@ -27,4 +27,9 @@ public partial class MainPage : ContentPage
         // Yeni kod:
         await Navigation.PushAsync(new AyarlarPage()); // Ayarlar ana sayfasına yönlendirir
     }
+
+    private async void KapananMasalar_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new KapananMasalar1View());
+    }
 }

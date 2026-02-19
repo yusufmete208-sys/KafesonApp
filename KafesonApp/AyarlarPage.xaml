@@ -49,10 +49,7 @@
                         Clicked="MenuSec_Clicked" 
                         Style="{StaticResource MenuButtonStyle}"/>
 
-                <Button Text="📉 Kapanan Masalar" 
-        CommandParameter="KapananMasalar" 
-        Clicked="MenuSec_Clicked" 
-        Style="{StaticResource MenuButtonStyle}"/>
+                
 
                 <BoxView HeightRequest="1" Color="Gray" Margin="0,15"/>
 

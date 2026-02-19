@@ -1,42 +1,72 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="KafesonApp.KapananMasalar1View">
+             xmlns:local="clr-namespace:KafesonApp"
+             x:Class="KafesonApp.KapananMasalar1View"
+             Title="Satış Geçmişi"
+             BackgroundColor="#F4F7F6">
 
-    <Grid RowDefinitions="Auto, *" BackgroundColor="#F0F3F4">
-        <Frame Grid.Row="0" BackgroundColor="#2C3E50" CornerRadius="0" Padding="15">
-            <Label Text="GÜNLÜK SATIŞ GEÇMİŞİ" TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"/>
+    <Grid RowDefinitions="Auto, Auto, *">
+        <Frame Grid.Row="0" BackgroundColor="#2C3E50" Margin="0" HasShadow="False" CornerRadius="0" Padding="10">
+            <Grid ColumnDefinitions="Auto, *">
+                <Button Text="← Geri" 
+                        Clicked="GeriDon_Clicked" 
+                        BackgroundColor="Transparent" 
+                        TextColor="White" 
+                        FontAttributes="Bold"
+                        FontSize="16"/>
+                <Label Grid.Column="1" 
+                       Text="SATIŞ GEÇMİŞİ" 
+                       TextColor="White" 
+                       FontSize="18" 
+                       FontAttributes="Bold" 
+                       VerticalOptions="Center" 
+                       HorizontalOptions="Center"
+                       Margin="0,0,60,0"/>
+            </Grid>
         </Frame>
 
-        <CollectionView Grid.Row="1" x:Name="KapananMasalarListesi" Margin="10">
+        <Frame Grid.Row="1" Margin="10,10,10,5" Padding="10" CornerRadius="10" BorderColor="#D5D8DC">
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                <Label Text="Tarih Filtrele:" VerticalOptions="Center" TextColor="#7F8C8D" FontAttributes="Bold"/>
+                <DatePicker x:Name="TarihSecici" 
+                            DateSelected="TarihDegisti" 
+                            Format="dd/MM/yyyy" 
+                            TextColor="#2C3E50"/>
+                <Button Text="Tümünü Gör" 
+                        Clicked="TumunuGoster_Clicked" 
+                        FontSize="12" 
+                        BackgroundColor="#ECF0F1" 
+                        TextColor="#2C3E50" 
+                        Padding="10,0"/>
+            </HorizontalStackLayout>
+        </Frame>
+
+        <CollectionView Grid.Row="2" x:Name="KapananMasalarListesi" Margin="10">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame BorderColor="#D5D8DC" CornerRadius="12" HasShadow="True" Padding="15" Margin="0,5" BackgroundColor="White">
-                        <VerticalStackLayout Spacing="8">
-                            <Grid ColumnDefinitions="*, Auto">
-                                <Label Text="{Binding MasaNo, StringFormat='Masa {0}'}" FontSize="18" FontAttributes="Bold" TextColor="#2C3E50"/>
-                                <Label Grid.Column="1" Text="{Binding ToplamTutar, StringFormat='{0:N2} TL'}" FontSize="18" FontAttributes="Bold" TextColor="#27AE60"/>
-                            </Grid>
+                    <Frame Margin="5,5" Padding="15" CornerRadius="12" HasShadow="True" BackgroundColor="White">
 
-                            <Label Text="{Binding KapanisZamani, StringFormat='Kapanış: {0:HH:mm}'}" FontSize="12" TextColor="Gray"/>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnMasaTapped" CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
 
-                            <BoxView HeightRequest="1" Color="#ECF0F1" Margin="0,5"/>
+                        <VerticalStackLayout Spacing="8" HorizontalOptions="Start" InputTransparent="True">
+                            <HorizontalStackLayout Spacing="10">
+                                <Label Text="{Binding MasaNo, StringFormat='MASA {0}'}" FontSize="18" FontAttributes="Bold" TextColor="#2C3E50"/>
+                                <Label Text="{Binding SiraNo, StringFormat='(Bugün #{0})'}" FontSize="14" TextColor="#7F8C8D" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
 
-                            <Label Text="Satılan Ürünler:" FontSize="13" FontAttributes="Bold" TextColor="#7F8C8D"/>
-                            <StackLayout BindableLayout.ItemsSource="{Binding Urunler}" Spacing="2">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid ColumnDefinitions="*, Auto" Padding="0,2">
-                                            <Label Text="{Binding Ad}" FontSize="13" TextColor="#34495E" VerticalOptions="Center"/>
-                                            <Label Grid.Column="1" Text="{Binding Miktar, StringFormat='x{0}'}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </StackLayout>
+                            <Label Text="{Binding ToplamTutar, StringFormat='{0:N2} TL'}" FontSize="22" FontAttributes="Bold" TextColor="#27AE60"/>
+
+                            <HorizontalStackLayout Spacing="15">
+                                <Label Text="{Binding AcilisZamani, StringFormat='Açılış: {0:HH:mm}'}" TextColor="#2980B9" FontAttributes="Bold"/>
+                                <Label Text="{Binding KapanisZamani, StringFormat='Kapanış: {0:HH:mm}'}" TextColor="#C0392B" FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
                         </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
     </Grid>
-</ContentView>
+</ContentPage>

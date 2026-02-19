@@ -10,6 +10,7 @@ public partial class AyarlarPage : ContentPage
         InitializeComponent();
     }
 
+
     private async void MenuSec_Clicked(object sender, EventArgs e)
     {
         // Test amaçlý bu satýrý ekle. Eðer bu mesaj geliyorsa buton çalýþýyor demektir.
@@ -37,9 +38,7 @@ public partial class AyarlarPage : ContentPage
                                       // Yeni oluþturduðumuz FiyatRevizeView'ý buraya baðlýyoruz
                     ContentArea.Content = new FiyatRevizeView();
                     break;
-                case "KapananMasalar":
-                    ContentArea.Content = new KapananMasalar1View();
-                    break;
+               
 
                 case "Geri":
                     await Navigation.PopAsync();
@@ -50,6 +49,7 @@ public partial class AyarlarPage : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Hata", "Görünüm yüklenemedi: " + ex.Message, "Tamam");
+            
         }
     }
 

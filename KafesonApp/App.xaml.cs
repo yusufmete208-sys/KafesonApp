@@ -41,7 +41,7 @@ public partial class App : Application
     {
         try
         {
-            var veriPaketi = new { KayitliMasalar = Masalar.ToList(), KayitliUrunler = Urunler.ToList(), KayitliRaporlar = SatisRaporlari.ToList() };
+            var veriPaketi = new { KayitliMasalar = Masalar.ToList(), KayitliUrunler = Urunler.ToList(), KayitliRaporlar = SatisRaporlari.ToList(), KayitliKapananMasalar = KapananMasalar.ToList() };
             File.WriteAllText(dosyaYolu, JsonSerializer.Serialize(veriPaketi));
         }
         catch { }
@@ -59,6 +59,11 @@ public partial class App : Application
                 Masalar.Clear(); foreach (var m in veri.KayitliMasalar) Masalar.Add(m);
                 Urunler.Clear(); foreach (var u in veri.KayitliUrunler) Urunler.Add(u);
                 SatisRaporlari.Clear(); foreach (var r in veri.KayitliRaporlar) SatisRaporlari.Add(r);
+                KapananMasalar.Clear();
+                if (veri.KayitliKapananMasalar != null)
+                {
+                    foreach (var k in veri.KayitliKapananMasalar) KapananMasalar.Add(k);
+                }
             }
         }
         catch { }
@@ -69,5 +74,6 @@ public partial class App : Application
         public List<Masa> KayitliMasalar { get; set; } = new();
         public List<Urun> KayitliUrunler { get; set; } = new();
         public List<SatisRaporu> KayitliRaporlar { get; set; } = new();
+        public List<Satis> KayitliKapananMasalar { get; set; } = new();
     }
 }

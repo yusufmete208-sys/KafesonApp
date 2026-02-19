@@ -35,6 +35,15 @@ namespace KafesonApp.Models
 
         public ObservableCollection<Urun> Siparisler { get; set; } = new();
         public ObservableCollection<Urun> Sepet { get; set; } = new();
+        public double NakitTutari { get; set; }
+
+        public double KartTutari { get; set; }
+        // Models/Masa.cs içindeki sınıfa ekleyin
+        public double NakitBirikim { get; set; }
+        public double KartBirikim { get; set; }
+        // Models/Masa.cs içine ekle
+        public List<SatisRaporu> Odemeler { get; set; } = new List<SatisRaporu>();
+        public List<Urun> KapanisUrunleri { get; set; } = new List<Urun>();
 
         // Kalan borç hesabı: Siparişlerin toplamından ödenmiş tutarı düşer
         public double KalanTutar => Siparisler.Sum(x => x.Fiyat * x.Miktar) - OdenmisTutar;
