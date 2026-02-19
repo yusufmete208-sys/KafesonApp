@@ -1,5 +1,6 @@
 using KafesonApp.Models; // Eðer Models klasörünüz yoksa bu satýrý da silebilirsiniz.
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace KafesonApp;
 
@@ -32,7 +33,7 @@ public partial class AyarlarPage : ContentPage
                     ContentArea.Content = new YeniUrunKayitView();
                     break;
                 case "MasaDuzenle":
-                    ContentArea.Content = new MasaYonetimView();
+                    ContentArea.Content = new MasaYonetimiView();
                     break;
                 case "FiyatGuncelle": // XAML'daki CommandParameter ile ayný olmalý
                                       // Yeni oluþturduðumuz FiyatRevizeView'ý buraya baðlýyoruz

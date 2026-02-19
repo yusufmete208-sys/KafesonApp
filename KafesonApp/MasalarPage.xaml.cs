@@ -1,9 +1,12 @@
-using KafesonApp.Models; // Modelleri tanýmasý için
+using KafesonApp.Models;
 
 namespace KafesonApp;
 
 public partial class MasalarPage : ContentPage
 {
+    // Varsayýlan olarak Ýç Mekan seçili gelir
+    string _seciliMekan = "Ýç Mekan";
+
     public MasalarPage()
     {
         InitializeComponent();
@@ -12,77 +15,90 @@ public partial class MasalarPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        // Sayfa her açýldýðýnda (örneðin ayarlardan geri dönünce) 
-        // içerideki her þeyi silip en güncel listeyi baþtan çizer.
+        MasalariYukle();
+    }
+
+    // Mekan butonlarýna basýldýðýnda çalýþýr
+    private void MekanSec_Clicked(object sender, EventArgs e)
+    {
+        var buton = (Button)sender;
+        _seciliMekan = buton.CommandParameter.ToString();
+
+        // Buton görünümlerini güncelle (Hangisi seçiliyse o mavi olur)
+        BtnIcMekan.BackgroundColor = _seciliMekan == "Ýç Mekan" ? Color.FromArgb("#3498DB") : Color.FromArgb("#34495E");
+        BtnIcMekan.TextColor = _seciliMekan == "Ýç Mekan" ? Colors.White : Color.FromArgb("#BDC3C7");
+
+        BtnBahce.BackgroundColor = _seciliMekan == "Bahçe" ? Color.FromArgb("#3498DB") : Color.FromArgb("#34495E");
+        BtnBahce.TextColor = _seciliMekan == "Bahçe" ? Colors.White : Color.FromArgb("#BDC3C7");
+
         MasalariYukle();
     }
 
     private void MasalariYukle()
     {
-        if (MasalarContainer == null) return;
         MasalarContainer.Children.Clear();
+        var filtrelenmisMasalar = App.Masalar.Where(m => m.Mekan == _seciliMekan).ToList();
 
-        var siraliMasalar = App.Masalar.OrderBy(m => m.No).ToList();
-
-        foreach (var masa in siraliMasalar)
+        foreach (var masa in filtrelenmisMasalar)
         {
-            // --- SÜRE HESAPLAMA ---
-            string sureMetni = "";
-            if (masa.IsDolu && masa.AcilisZamani.HasValue)
+            string masaMetni;
+
+            if (masa.IsDolu)
             {
-                var gecenSure = DateTime.Now - masa.AcilisZamani.Value;
-                sureMetni = $"\n{(int)gecenSure.TotalMinutes} dk";
+                // Dakika hesabý
+                string gecenSure = "";
+                if (masa.AcilisZamani.HasValue)
+                {
+                    var fark = DateTime.Now - masa.AcilisZamani.Value;
+                    gecenSure = $"\n{Math.Floor(fark.TotalMinutes)} dk";
+                }
+
+                // DÜZELTME: Masa No, DURUM ve Fiyat artýk tamamen alt alta
+                // Her bir bilgi için yeni satýr (\n) ekledik
+                masaMetni = $"MASA {masa.No}\nDOLU\n{masa.ToplamTutar:N2} TL{gecenSure}";
+            }
+            else
+            {
+                // Boþ masa yine sade
+                masaMetni = $"MASA {masa.No}";
             }
 
-            // Metne süre bilgisini ekliyoruz
-            string butonMetni = $"Masa {masa.No}\n{(masa.IsDolu ? "DOLU" : "BOÞ")}{sureMetni}";
+            // --- PREMÝUM TASARIM AYARLARI ---
+            var premiumYesil = Color.FromArgb("#1DB954");
+            var premiumKirmizi = Color.FromArgb("#E50914");
 
-            var masaButonu = new Button
+            var masaButon = new Button
             {
-                Text = butonMetni,
-                WidthRequest = 160,
-                HeightRequest = 160,
-                Margin = 10,
-                CornerRadius = 20,
+                Text = masaMetni,
+                WidthRequest = 180, // Okunabilirlik için biraz daha geniþlettik
+                HeightRequest = 180,
+                Margin = 12,
                 FontSize = 18,
+                LineBreakMode = LineBreakMode.WordWrap, // Yazýlarýn taþmasýný engeller
+                CornerRadius = 25,
+                BackgroundColor = masa.IsDolu ? premiumKirmizi : premiumYesil,
+                TextColor = Colors.White,
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = masa.IsDolu ? Color.FromArgb("#FF0000") : Color.FromArgb("#008000"),
-                TextColor = Colors.White
+                Padding = 10,
+                Shadow = new Shadow
+                {
+                    Brush = Colors.Black,
+                    Offset = new Point(0, 8),
+                    Opacity = 0.25f,
+                    Radius = 15
+                }
             };
 
-            masaButonu.Clicked += async (s, e) =>
-            {
+            masaButon.Clicked += async (s, e) => {
                 await Navigation.PushAsync(new SiparisPage(masa));
             };
 
-            MasalarContainer.Children.Add(masaButonu);
+            MasalarContainer.Children.Add(masaButon);
         }
     }
 
-
-
-
-
-
-    private async void Masa_Clicked(object sender, EventArgs e)
-    {
-        var buton = (Button)sender;
-
-        // Casting iþlemini (Masa) olarak deðil, tam yolunu belirterek yapalým
-        if (buton.BindingContext is KafesonApp.Models.Masa secilenMasa)
-        {
-            // Sipariþ sayfasýna Masa objesini gönderiyoruz
-            await Navigation.PushAsync(new SiparisPage(secilenMasa));
-        }
-    }
-
-
-    // YENÝ BUTONUN KODU BURAYA (Sýnýfýn en altýna ama son parantezin içine)
     private async void AnaMenuyeGit_Clicked(object sender, EventArgs e)
     {
-        await Navigation.PopAsync(); //
+        await Navigation.PopAsync();
     }
-
-
-
 }

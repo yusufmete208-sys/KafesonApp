@@ -27,8 +27,12 @@ public partial class App : Application
 
         if (Masalar.Count == 0)
         {
-            for (int i = 1; i <= 20; i++)
-                Masalar.Add(new Masa { No = i, IsDolu = false });
+            // App.xaml.cs içinde örnek tanımlama:
+            for (int i = 1; i <= 10; i++)
+                Masalar.Add(new Masa { No = i, Mekan = "İç Mekan" });
+
+            for (int i = 11; i <= 20; i++)
+                Masalar.Add(new Masa { No = i, Mekan = "Bahçe" }); ;
         }
     }
 

@@ -1,72 +1,62 @@
-﻿using System;
-using System.Collections.ObjectModel; // ObservableCollection için
-using System.ComponentModel; // INotifyPropertyChanged için
-using System.Runtime.CompilerServices; // CallerMemberName için
-using System.Linq; // .Sum() hesaplaması için
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq; // LINQ sorguları (Sum) için şart
 
 namespace KafesonApp.Models
 {
     public class Masa : INotifyPropertyChanged
     {
         private bool _isDolu;
-        private double _odenmisTutar;
-        private DateTime? _acilisZamani;
+        private string _mekan = "İç Mekan"; // Varsayılan mekan
 
         public int No { get; set; }
+
+        // Mekan bilgisi (İç Mekan veya Bahçe)
+        public string Mekan
+        {
+            get => _mekan;
+            set { _mekan = value; OnPropertyChanged(nameof(Mekan)); }
+        }
 
         public bool IsDolu
         {
             get => _isDolu;
-            set { _isDolu = value; OnPropertyChanged(); OnPropertyChanged(nameof(GecenSure)); }
+            set { _isDolu = value; OnPropertyChanged(nameof(IsDolu)); }
         }
 
-        public double OdenmisTutar
-        {
-            get => _odenmisTutar;
-            set { _odenmisTutar = value; OnPropertyChanged(); }
-        }
+        // --- HESAPLAMA VE ÖDEME ALANLARI ---
 
-        // Masanın açıldığı anı tutan alan
-        public DateTime? AcilisZamani
-        {
-            get => _acilisZamani;
-            set { _acilisZamani = value; OnPropertyChanged(); OnPropertyChanged(nameof(GecenSure)); }
-        }
+        // Masadaki aktif siparişler (Ekranda anlık görünmesi için)
+        public ObservableCollection<Urun> Siparisler { get; set; } = new ObservableCollection<Urun>();
 
-        public ObservableCollection<Urun> Siparisler { get; set; } = new();
-        public ObservableCollection<Urun> Sepet { get; set; } = new();
-        public double NakitTutari { get; set; }
+        // Sepetteki onay bekleyen ürünler
+        public ObservableCollection<Urun> Sepet { get; set; } = new ObservableCollection<Urun>();
 
-        public double KartTutari { get; set; }
-        // Models/Masa.cs içindeki sınıfa ekleyin
-        public double NakitBirikim { get; set; }
-        public double KartBirikim { get; set; }
-        // Models/Masa.cs içine ekle
-        public List<SatisRaporu> Odemeler { get; set; } = new List<SatisRaporu>();
+        // Kapanışta rapora gidecek ürünlerin yedeği
         public List<Urun> KapanisUrunleri { get; set; } = new List<Urun>();
 
-        // Kalan borç hesabı: Siparişlerin toplamından ödenmiş tutarı düşer
-        public double KalanTutar => Siparisler.Sum(x => x.Fiyat * x.Miktar) - OdenmisTutar;
+        // Raporlama için nakit ve kart birikimleri
+        public double NakitBirikim { get; set; }
+        public double KartBirikim { get; set; }
+        public double OdenmisTutar { get; set; }
 
-        // Masanın ne kadar süredir açık olduğunu hesaplayan özellik
-        public string GecenSure
-        {
-            get
-            {
-                if (AcilisZamani == null || !IsDolu) return "";
-                var fark = DateTime.Now - AcilisZamani.Value;
-                return $"{(int)fark.TotalMinutes} dk";
-            }
-        }
+        public DateTime? AcilisZamani { get; set; }
 
+        // HATAYI ÇÖZEN ÖZELLİK: Masanın toplam borcunu hesaplar
+        public double ToplamTutar => Siparisler?.Sum(x => x.Miktar * x.Fiyat) ?? 0;
+
+        // Kalan borç (Toplam - Ödenen)
+        public double KalanTutar => ToplamTutar - OdenmisTutar;
+
+        // --- UI GÜNCELLEME SİSTEMİ ---
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-            // Siparişler veya ödenen tutar değiştiğinde KalanTutar'ı da güncelle
-            if (name == nameof(OdenmisTutar))
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(KalanTutar)));
+        // Sipariş listesi değiştiğinde toplam tutarı güncellemesi için tetikleyici
+        public void YenidenHesapla()
+        {
+            OnPropertyChanged(nameof(ToplamTutar));
+            OnPropertyChanged(nameof(KalanTutar));
         }
     }
 }
