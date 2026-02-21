@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KafesonApp.LoglarPage"
+             Title="Sistem Kayıtları (Loglar)"
+             BackgroundColor="#F5F6FA">
+
+    <CollectionView ItemsSource="{Binding .}">
+        <CollectionView.ItemTemplate>
+            <DataTemplate>
+                <Frame Margin="10,5" Padding="15" CornerRadius="12" BorderColor="#DCDDE1" HasShadow="True">
+                    <VerticalStackLayout Spacing="5">
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="{Binding Tarih, StringFormat='{0:HH:mm}'}" 
+                                   FontSize="13" TextColor="Gray" FontAttributes="Bold" />
+                            <Label Text="{Binding IslemTipi}" 
+                                   FontSize="13" TextColor="#2980B9" FontAttributes="Bold" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding Mesaj}" FontSize="15" TextColor="#2C3E50" LineBreakMode="WordWrap"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentPage>

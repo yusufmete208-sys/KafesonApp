@@ -28,6 +28,13 @@
                             HeightRequest="60" 
                             CornerRadius="10"/>
 
+                    <Button Text="Log Kayıtları" 
+        Clicked="Loglar_Clicked"
+        BackgroundColor="#34495E" 
+        TextColor="White" 
+        HeightRequest="60" 
+        CornerRadius="10"/>
+
 
                 </VerticalStackLayout>
                 

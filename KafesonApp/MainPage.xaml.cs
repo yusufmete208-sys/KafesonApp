@@ -32,4 +32,11 @@ public partial class MainPage : ContentPage
     {
         await Navigation.PushAsync(new KapananMasalar1View());
     }
+
+    private async void Loglar_Clicked(object sender, EventArgs e)
+    {
+        // LoglarPage henüz oluşturulmadıysa hata verebilir, 3. adımı tamamlayın.
+        await Navigation.PushAsync(new LoglarPage());
+    }
+
 }

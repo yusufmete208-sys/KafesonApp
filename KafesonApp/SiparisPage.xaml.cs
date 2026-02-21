@@ -1,5 +1,6 @@
 using KafesonApp.Models;
 using System.Collections.ObjectModel;
+using System.Linq; // LINQ iþlemleri için mutlaka olmalý
 
 namespace KafesonApp;
 
@@ -86,36 +87,47 @@ public partial class SiparisPage : ContentPage
 
     private async void AnaButon_Clicked(object sender, EventArgs e)
     {
-        // 1. DURUM: SEPETTE SÝPARÝÞ VARSA
+        // 1. DURUM: SEPETTE ONAYLANMAMIÞ ÜRÜN VARSA (Sipariþi Onayla)
         if (SecilenMasa.Sepet.Count > 0)
         {
             if (SecilenMasa.AcilisZamani == null) SecilenMasa.AcilisZamani = DateTime.Now;
 
+            // Log için sipariþ detaylarýný hazýrla
+            string urunDetay = string.Join(", ", SecilenMasa.Sepet.Select(x => $"{x.Miktar}x {x.Ad}"));
+            App.LogEkle($"Masa {SecilenMasa.No}: Sipariþ eklendi ({SecilenMasa.Sepet.Count} çeþit ürün: {urunDetay})", "Sipariþ");
+
             foreach (var urun in SecilenMasa.Sepet.ToList())
             {
                 var mevcutUrun = SecilenMasa.Siparisler.FirstOrDefault(x => x.Ad == urun.Ad);
-                if (mevcutUrun != null) mevcutUrun.Miktar += urun.Miktar;
-                else SecilenMasa.Siparisler.Add(new Urun { Ad = urun.Ad, Fiyat = urun.Fiyat, Miktar = urun.Miktar });
+                if (mevcutUrun != null)
+                    mevcutUrun.Miktar += urun.Miktar;
+                else
+                    SecilenMasa.Siparisler.Add(new Urun { Ad = urun.Ad, Fiyat = urun.Fiyat, Miktar = urun.Miktar });
 
+                // Mutfaða bilgi gönder
                 App.MutfakSiparisleri.Add(new MutfakSiparisi { MasaNo = SecilenMasa.No, UrunAd = urun.Ad, Miktar = urun.Miktar });
             }
+
             SecilenMasa.Sepet.Clear();
             SecilenMasa.IsDolu = true;
-            App.VerileriKaydet();
+            App.VerileriKaydet(); //
             await DisplayAlert("Baþarýlý", "Sipariþler mutfaða iletildi.", "Tamam");
         }
-        // 2. DURUM: BORÇ VARSA (ÖDEME AL)
+        // 2. DURUM: SEPET BOÞ AMA ÖDENMEMÝÞ TUTAR VARSA (Ödeme Al Sayfasýna Git)
         else if (SecilenMasa.KalanTutar > 0.01)
         {
-            await Navigation.PushModalAsync(new OdemePage(SecilenMasa));
+            await Navigation.PushModalAsync(new OdemePage(SecilenMasa)); //
         }
-        // 3. DURUM: HESABI KAPAT (ARÞÝVLEME)
+        // 3. DURUM: BORÇ BÝTTÝ, MASAYI KAPAT (Arþivleme ve Günlük Sýra Sýfýrlama)
         else
         {
-            // Rapor objesini oluþtur
+            // BUGÜNÜN SIRA NUMARASINI HESAPLA (Her gün 1'den baþlamasý için)
+            int bugunkuSira = App.KapananMasalar.Count(x => x.KapanisZamani.Date == DateTime.Today) + 1;
+
+            // Arþiv kaydýný oluþtur
             var yeniSatis = new Satis
             {
-                SiraNo = App.KapananMasalar.Count + 1,
+                SiraNo = bugunkuSira, // Günlük sýfýrlanan numara
                 MasaNo = SecilenMasa.No,
                 AcilisZamani = SecilenMasa.AcilisZamani,
                 KapanisZamani = DateTime.Now,
@@ -125,7 +137,10 @@ public partial class SiparisPage : ContentPage
                 Urunler = new List<Urun>(SecilenMasa.KapanisUrunleri)
             };
 
-            // Arþive ekle (En baþa)
+            // Kapatma iþlemini logla
+            App.LogEkle($"Masa {SecilenMasa.No} kapatýldý. Günlük Sýra: {bugunkuSira}, Toplam: {yeniSatis.ToplamTutar:N2} TL", "Kapatma");
+
+            // Arþive listenin en baþýna ekle
             App.KapananMasalar.Insert(0, yeniSatis);
 
             // Masayý tamamen sýfýrla
@@ -138,49 +153,52 @@ public partial class SiparisPage : ContentPage
             SecilenMasa.OdenmisTutar = 0;
 
             App.VerileriKaydet();
-            await DisplayAlert("Hesap Kapandý", "Masa arþive kaydedildi.", "Tamam");
+            await DisplayAlert("Hesap Kapandý", $"Masa arþive kaydedildi. Bugünün {bugunkuSira}. satýþý.", "Tamam");
             await Navigation.PopAsync();
         }
-        DurumuGuncelle();
-    }
 
-    private void MiktarArtir_Clicked(object sender, EventArgs e)
-    {
-        var urun = (Urun)((Button)sender).CommandParameter;
-        if (urun != null) { urun.Miktar++; DurumuGuncelle(); }
-    }
-
-    private void SilTiklandi(object sender, EventArgs e)
-    {
-        var urun = (Urun)((Button)sender).CommandParameter;
-        if (urun != null)
-        {
-            if (urun.Miktar > 1) urun.Miktar--;
-            else SecilenMasa.Sepet.Remove(urun);
-            DurumuGuncelle();
-        }
+        DurumuGuncelle(); // Buton metnini ve renklerini tazele
     }
 
     private async void MasaAktar_Clicked(object sender, EventArgs e)
     {
+        // 1. Masanýn dolu olup olmadýðýný kontrol et
         if (SecilenMasa == null || !SecilenMasa.IsDolu) return;
 
+        // 2. Boþ masalarý listele
         var bosMasalar = App.Masalar.Where(m => !m.IsDolu).Select(m => $"Masa {m.No}").ToArray();
         string secim = await DisplayActionSheet("Hedef Masayý Seçin", "Ýptal", null, bosMasalar);
 
+        // 3. Bir seçim yapýldýysa iþlemi baþlat
         if (secim != "Ýptal" && !string.IsNullOrEmpty(secim))
         {
             int hedefNo = int.Parse(secim.Replace("Masa ", ""));
             var hedefMasa = App.Masalar.First(m => m.No == hedefNo);
 
-            foreach (var urun in SecilenMasa.Siparisler.ToList()) hedefMasa.Siparisler.Add(urun);
+            // --- LOG KAYDI HAZIRLAMA VE EKLEME ---
+            // Aktarýlan ürünlerin listesini oluþtur
+            string aktarilanUrunler = string.Join(", ", SecilenMasa.Siparisler.Select(x => $"{x.Miktar}x {x.Ad}"));
 
+            // Logu listeye ekle (Hata almamak için deðiþkenlerin olduðu bu blokta olmalý)
+            App.LogEkle($"Masa {SecilenMasa.No} -> Masa {hedefNo} aktarýldý. Aktarýlan Ürünler: {aktarilanUrunler}", "Masa Ýþlemi");
+            // -------------------------------------
+
+            // 4. Ürünleri yeni masaya taþý
+            foreach (var urun in SecilenMasa.Siparisler.ToList())
+            {
+                hedefMasa.Siparisler.Add(urun);
+            }
+
+            // 5. Hedef masayý güncelle
             hedefMasa.IsDolu = true;
             hedefMasa.AcilisZamani = SecilenMasa.AcilisZamani;
+
+            // 6. Eski masayý sýfýrla
             SecilenMasa.Siparisler.Clear();
             SecilenMasa.IsDolu = false;
             SecilenMasa.AcilisZamani = null;
 
+            // 7. Verileri kaydet ve geri dön
             App.VerileriKaydet();
             await Navigation.PopAsync();
         }
@@ -198,6 +216,10 @@ public partial class SiparisPage : ContentPage
             int hedefNo = int.Parse(secim.Replace("Masa ", ""));
             var hedefMasa = App.Masalar.First(m => m.No == hedefNo);
 
+            // Log için birleþen ürünleri al
+            string birlestirilenUrunler = string.Join(", ", SecilenMasa.Siparisler.Select(x => $"{x.Miktar}x {x.Ad}"));
+            App.LogEkle($"Masa {SecilenMasa.No} + Masa {hedefNo} birleþtirildi. Aktarýlanlar: {birlestirilenUrunler}", "Masa Ýþlemi");
+
             foreach (var urun in SecilenMasa.Siparisler.ToList())
             {
                 var mevcut = hedefMasa.Siparisler.FirstOrDefault(x => x.Ad == urun.Ad);
@@ -211,6 +233,23 @@ public partial class SiparisPage : ContentPage
 
             App.VerileriKaydet();
             await Navigation.PopAsync();
+        }
+    }
+
+    private void MiktarArtir_Clicked(object sender, EventArgs e)
+    {
+        var urun = (Urun)((Button)sender).CommandParameter;
+        if (urun != null) { urun.Miktar++; DurumuGuncelle(); }
+    }
+
+    private void SilTiklandi(object sender, EventArgs e)
+    {
+        var urun = (Urun)((Button)sender).CommandParameter;
+        if (urun != null)
+        {
+            if (urun.Miktar > 1) urun.Miktar--;
+            else SecilenMasa.Sepet.Remove(urun);
+            DurumuGuncelle();
         }
     }
 
