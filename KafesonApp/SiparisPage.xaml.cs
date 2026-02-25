@@ -145,6 +145,7 @@ public partial class SiparisPage : ContentPage
 
                 App.MutfakSiparisleri.Add(new MutfakSiparisi { MasaNo = SecilenMasa.No, UrunAd = urun.Ad, Miktar = urun.Miktar, KayitSaati = DateTime.Now });
             }
+
             SecilenMasa.Sepet.Clear();
             SecilenMasa.IsDolu = true;
 
@@ -193,7 +194,6 @@ public partial class SiparisPage : ContentPage
             await DisplayAlert("Hesap Kapandı", "Masa kapatıldı.", "Tamam");
             await Navigation.PopAsync();
         }
-        DurumuGuncelle();
     }
 
     private async void MasaAktar_Clicked(object sender, EventArgs e)

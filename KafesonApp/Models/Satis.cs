@@ -1,11 +1,19 @@
-﻿namespace KafesonApp.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace KafesonApp.Models
 {
     public class Satis
     {
-        public DateTime Tarih { get; set; }
-        public double Tutar { get; set; }
-        public string OdemeTuru { get; set; }
-        public int MasaNo { get; set; } // Hangi masadan satıldı?
-        public string UrunDetaylari { get; set; } // "2 Çay, 1 Tost" gibi özet metin
+        public int SiraNo { get; set; } // Günlük kaçıncı masa olduğu
+                                        // Models/Satis.cs içine ekleyin
+        
+        public int MasaNo { get; set; }
+        public DateTime? AcilisZamani { get; set; }
+        public DateTime KapanisZamani { get; set; }
+        public double ToplamTutar { get; set; }
+        public double NakitTutari { get; set; } // Nakit ödenen kısım
+        public double KartTutari { get; set; }  // Kartla ödenen kısım
+        public List<Urun> Urunler { get; set; } = new List<Urun>();
     }
 }

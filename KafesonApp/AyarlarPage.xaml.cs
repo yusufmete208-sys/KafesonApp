@@ -17,6 +17,7 @@ public partial class AyarlarPage : ContentPage
         }
     }
 
+
     private async void MenuSec_Clicked(object sender, EventArgs e)
     {
         // Tıklanan butonu ve parametresini alıyoruz
@@ -67,6 +68,7 @@ public partial class AyarlarPage : ContentPage
                     // Ana Sayfaya (MainPage) geri döner
                     await Navigation.PopAsync();
                     break;
+
             }
         }
         catch (Exception ex)
@@ -74,4 +76,6 @@ public partial class AyarlarPage : ContentPage
             await DisplayAlert("Hata", "Sayfa yüklenirken bir sorun oluştu: " + ex.Message, "Tamam");
         }
     }
+
+   
 }

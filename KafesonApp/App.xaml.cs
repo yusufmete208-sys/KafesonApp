@@ -1,6 +1,8 @@
 ﻿using KafesonApp.Models;
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.IO; // Path ve File işlemleri için ŞART
+using System.Linq; // .ToList() ve LINQ işlemleri için ŞART
 
 namespace KafesonApp;
 
@@ -10,6 +12,7 @@ public partial class App : Application
 
     public static ObservableCollection<Kullanici> Kullanicilar { get; set; } = new();
     public static ObservableCollection<Masa> Masalar { get; set; } = new();
+    public static ObservableCollection<Satis> KapananMasalar { get; set; } = new();
     public static ObservableCollection<Urun> Urunler { get; set; } = new();
     public static ObservableCollection<SatisRaporu> SatisRaporlari { get; set; } = new();
     public static ObservableCollection<MutfakSiparisi> MutfakSiparisleri { get; set; } = new();
@@ -25,6 +28,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
         VerileriYukle();
 
         if (Kullanicilar.Count == 0)
@@ -76,6 +80,20 @@ public partial class App : Application
         VerileriKaydet(); // Log eklendiğinde JSON dosyasına anında kaydet
     }
 
+    // --- LOG EKLEME METODU ---
+    public static void LogEkle(string mesaj, string tip = "Genel")
+    {
+        // Listenin en başına ekle
+        Loglar.Insert(0, new LogKaydi
+        {
+            Mesaj = mesaj,
+            IslemTipi = tip,
+            Tarih = DateTime.Now
+        });
+
+        VerileriKaydet();
+    }
+
     public static void VerileriKaydet()
     {
         try
@@ -109,6 +127,7 @@ public partial class App : Application
         {
             string jsonString = File.ReadAllText(dosyaYolu);
             var veri = JsonSerializer.Deserialize<VeriDeposu>(jsonString);
+
             if (veri != null)
             {
                 Kullanicilar.Clear(); foreach (var k in veri.Kullanicilar) Kullanicilar.Add(k);
@@ -121,6 +140,7 @@ public partial class App : Application
         catch { }
     }
 
+    // --- VERİ SAKLAMA SINIFI (Hata almamak için burayı kontrol et) ---
     private class VeriDeposu
     {
         public List<Kullanici> Kullanicilar { get; set; } = new();

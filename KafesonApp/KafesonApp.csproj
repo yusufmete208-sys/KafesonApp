@@ -111,6 +111,9 @@
 	  <MauiXaml Update="RaporPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="SatisDetayPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="SiparisPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
