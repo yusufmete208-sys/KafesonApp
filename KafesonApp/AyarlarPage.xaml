@@ -9,71 +9,123 @@
         <Style x:Key="MenuButtonStyle" TargetType="Button">
             <Setter Property="BackgroundColor" Value="#5E35B1"/>
             <Setter Property="TextColor" Value="White"/>
-            <Setter Property="HorizontalOptions" Value="Fill"/>
-            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="HeightRequest" Value="50"/>
             <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="{OnIdiom Phone='5,0', Desktop='0,5'}"/>
+            <Setter Property="HorizontalOptions" Value="{OnIdiom Phone='Start', Desktop='Fill'}"/>
+            <Setter Property="WidthRequest" Value="{OnIdiom Phone='140', Desktop='-1'}"/>
         </Style>
     </ContentPage.Resources>
 
-    <Grid ColumnDefinitions="250, *">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{OnIdiom Phone='Auto', Desktop='*'}" />
+            <RowDefinition Height="{OnIdiom Phone='*', Desktop='0'}" />
+        </Grid.RowDefinitions>
 
-        <Border Grid.Column="0" BackgroundColor="#2C3E50" StrokeThickness="0">
-            <VerticalStackLayout Spacing="10" Padding="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{OnIdiom Phone='*', Desktop='250'}" />
+            <ColumnDefinition Width="{OnIdiom Phone='0', Desktop='*'}" />
+        </Grid.ColumnDefinitions>
 
-                <Label Text="YÖNETİM" 
-                       TextColor="White" 
-                       FontSize="20" 
-                       FontAttributes="Bold" 
-                       HorizontalOptions="Center" 
-                       Margin="0,10,0,20"/>
+        <Border Grid.Row="0" Grid.Column="0" 
+                BackgroundColor="#2C3E50" 
+                StrokeThickness="0">
 
-                <Button Text="Menü Listesi" 
-                        CommandParameter="MenuListesi" 
-                        Clicked="MenuSec_Clicked" 
-                        Style="{StaticResource MenuButtonStyle}"/>
+            <ScrollView Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}"
+                        VerticalScrollBarVisibility="Never" 
+                        HorizontalScrollBarVisibility="Never">
 
-                <Button Text="Yeni Ürün Kayıt" 
-                        CommandParameter="YeniKayit" 
-                        Clicked="MenuSec_Clicked" 
-                        Style="{StaticResource MenuButtonStyle}"/>
+                <StackLayout Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}" 
+                             Spacing="10" 
+                             Padding="15">
 
-                <Button Text="Fiyat Ayarları" 
-                        CommandParameter="FiyatGuncelle" 
-                        Clicked="MenuSec_Clicked" 
-                        Style="{StaticResource MenuButtonStyle}"/>
+                    <Label Text="{OnIdiom Phone='⚙️ AYARLAR', Desktop='YÖNETİM'}" 
+                           TextColor="White" 
+                           FontSize="{OnIdiom Phone='16', Desktop='20'}" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center" 
+                           VerticalOptions="Center"
+                           Margin="{OnIdiom Phone='0,0,10,0', Desktop='0,10,0,20'}"/>
 
-                <Button Text="Masa Düzeni" 
-                        CommandParameter="MasaDuzenle" 
-                        Clicked="MenuSec_Clicked" 
-                        Style="{StaticResource MenuButtonStyle}"/>
+                    <Button Text="Ürün Listesi" 
+                            CommandParameter="MenuListesi" 
+                            Clicked="MenuSec_Clicked" 
+                            Style="{StaticResource MenuButtonStyle}"/>
 
-                <BoxView HeightRequest="1" Color="Gray" Margin="0,15"/>
+                    <Button Text="Yeni Ürün Ekle" 
+                            CommandParameter="YeniKayit" 
+                            Clicked="MenuSec_Clicked" 
+                            Style="{StaticResource MenuButtonStyle}"/>
 
-                <Button Text="🏠 Ana Menüye Dön" 
-                        CommandParameter="Geri" 
-                        Clicked="MenuSec_Clicked" 
-                        BackgroundColor="#E74C3C" 
-                        TextColor="White" 
-                        HeightRequest="50" 
-                        CornerRadius="8"/>
-            </VerticalStackLayout>
+                    <Button Text="Fiyat Güncelle" 
+                            CommandParameter="FiyatGuncelle" 
+                            Clicked="MenuSec_Clicked" 
+                            Style="{StaticResource MenuButtonStyle}"/>
+
+                    <Button Text="Personel Kontrol" 
+                            CommandParameter="PersonelKontrol" 
+                            Clicked="MenuSec_Clicked" 
+                            Style="{StaticResource MenuButtonStyle}"/>
+
+                    <Button Text="Kapanan Masalar" 
+                            CommandParameter="KapananMasalar" 
+                            Clicked="MenuSec_Clicked" 
+                            Style="{StaticResource MenuButtonStyle}"/>
+
+                    <Button Text="Masa Düzeni" 
+                            CommandParameter="MasaDuzenle" 
+                            Clicked="MenuSec_Clicked" 
+                            Style="{StaticResource MenuButtonStyle}"/>
+
+                    <Button Text="Sistem Logları" 
+                            CommandParameter="SistemLoglari" 
+                            Clicked="MenuSec_Clicked" 
+                            BackgroundColor="#8E44AD"
+                            Style="{StaticResource MenuButtonStyle}"/>
+
+                    <BoxView Color="Gray" 
+                             WidthRequest="{OnIdiom Phone='1', Desktop='-1'}"
+                             HeightRequest="{OnIdiom Phone='40', Desktop='1'}"
+                             Margin="{OnIdiom Phone='10,0', Desktop='0,15'}"/>
+
+                    <Button Text="Ana Menüye Dön" 
+                            CommandParameter="Geri" 
+                            Clicked="MenuSec_Clicked" 
+                            BackgroundColor="#E74C3C" 
+                            TextColor="White" 
+                            HeightRequest="50" 
+                            CornerRadius="8"
+                            FontSize="14"
+                            WidthRequest="{OnIdiom Phone='150', Desktop='-1'}"
+                            Margin="{OnIdiom Phone='5,0', Desktop='0,0'}"/>
+
+                </StackLayout>
+            </ScrollView>
         </Border>
 
-        <ContentView Grid.Column="1" x:Name="ContentArea" Padding="20">
+        <ContentView x:Name="ContentArea" 
+                     Grid.Row="{OnIdiom Phone='1', Desktop='0'}" 
+                     Grid.Column="{OnIdiom Phone='0', Desktop='1'}" 
+                     Padding="{OnIdiom Phone='10', Desktop='20'}"
+                     BackgroundColor="#F4F7F6">
+
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                <Label Text="⚙️" FontSize="60" HorizontalOptions="Center"/>
-                <Label Text="Yönetim Paneline Hoş Geldiniz" 
-                       FontSize="24" 
+                <Label Text="⚙️" FontSize="{OnIdiom Phone='40', Desktop='60'}" HorizontalOptions="Center"/>
+                <Label Text="Yönetim Paneli" 
+                       FontSize="{OnIdiom Phone='20', Desktop='24'}" 
                        FontAttributes="Bold" 
                        TextColor="#34495E"
                        HorizontalOptions="Center"/>
-                <Label Text="İşlem yapmak için soldaki menüyü kullanın." 
-                       FontSize="16" 
+                <Label Text="İşlem yapmak için menüyü kullanın." 
+                       FontSize="{OnIdiom Phone='14', Desktop='16'}" 
                        TextColor="Gray"
-                       HorizontalOptions="Center"/>
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"/>
             </VerticalStackLayout>
+
         </ContentView>
 
     </Grid>

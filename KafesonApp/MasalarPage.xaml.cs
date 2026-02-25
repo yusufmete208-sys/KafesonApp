@@ -1,9 +1,12 @@
-using KafesonApp.Models; // Modelleri tanýmasý için
+ï»¿using KafesonApp.Models;
+using Microsoft.Maui.Controls.Shapes; // Yuvarlak hatlar (RoundRectangle) iÃ§in gerekli kÃ¼tÃ¼phane
 
 namespace KafesonApp;
 
 public partial class MasalarPage : ContentPage
 {
+    string _seciliMekan = "Ä°Ã§ Mekan";
+
     public MasalarPage()
     {
         InitializeComponent();
@@ -12,67 +15,95 @@ public partial class MasalarPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        // Sayfa her açýldýðýnda (örneðin ayarlardan geri dönünce) 
-        // içerideki her þeyi silip en güncel listeyi baþtan çizer.
+        MasalariYukle();
+    }
+
+    private void MekanSec_Clicked(object sender, EventArgs e)
+    {
+        var buton = (Button)sender;
+        _seciliMekan = buton.CommandParameter.ToString();
+
+        // SeÃ§ilen mekana gÃ¶re butonlarÄ±n renklerini gÃ¼ncelle (Animasyonlu geÃ§iÅŸ hissi verir)
+        BtnIcMekan.BackgroundColor = _seciliMekan == "Ä°Ã§ Mekan" ? Color.FromArgb("#3B82F6") : Colors.Transparent;
+        BtnIcMekan.TextColor = _seciliMekan == "Ä°Ã§ Mekan" ? Colors.White : Color.FromArgb("#94A3B8");
+
+        BtnBahce.BackgroundColor = _seciliMekan == "BahÃ§e" ? Color.FromArgb("#3B82F6") : Colors.Transparent;
+        BtnBahce.TextColor = _seciliMekan == "BahÃ§e" ? Colors.White : Color.FromArgb("#94A3B8");
+
         MasalariYukle();
     }
 
     private void MasalariYukle()
     {
-        if (MasalarContainer == null) return;
         MasalarContainer.Children.Clear();
+        var filtrelenmisMasalar = App.Masalar.Where(m => m.Mekan == _seciliMekan).ToList();
 
-        var siraliMasalar = App.Masalar.OrderBy(m => m.No).ToList();
-
-        foreach (var masa in siraliMasalar)
+        foreach (var masa in filtrelenmisMasalar)
         {
-            // Metni sadece Masa No ve Durum olarak ayarlýyoruz
-            string butonMetni = $"Masa {masa.No}\n{(masa.IsDolu ? "DOLU" : "BOÞ")}";
+            // Modern ZÃ¼mrÃ¼t YeÅŸili ve CanlÄ± KÄ±rmÄ±zÄ±
+            var bosRenk = Color.FromArgb("#10B981");
+            var doluRenk = Color.FromArgb("#EF4444");
+            var arkaPlan = masa.IsDolu ? doluRenk : bosRenk;
 
-            var masaButonu = new Button
+            // MasayÄ± temsil eden ana kart
+            var cardBorder = new Border
             {
-                Text = butonMetni,
                 WidthRequest = 160,
                 HeightRequest = 160,
-                Margin = 10,
-                CornerRadius = 20,
-                FontSize = 18,
-                FontAttributes = FontAttributes.Bold,
-                // Doluysa Kýrmýzý, Boþsa Yeþil renk mantýðý devam ediyor
-                BackgroundColor = masa.IsDolu ? Color.FromArgb("#FF0000") : Color.FromArgb("#008000"),
-                TextColor = Colors.White
+                Margin = new Thickness(10),
+                BackgroundColor = arkaPlan,
+                StrokeThickness = 0,
+                Padding = new Thickness(15),
+                StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(20) },
+                Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 6), Opacity = 0.2f, Radius = 10 }
             };
 
-            masaButonu.Clicked += async (s, e) =>
+            // KartÄ±n iÃ§indeki yazÄ±larÄ± alt alta dizecek yapÄ±
+            var layout = new VerticalStackLayout { Spacing = 5, VerticalOptions = LayoutOptions.Center };
+
+            layout.Children.Add(new Label
             {
+                Text = $"MASA {masa.No}",
+                TextColor = Colors.White,
+                FontSize = 22,
+                FontAttributes = FontAttributes.Bold,
+                HorizontalOptions = LayoutOptions.Center
+            });
+
+            if (masa.IsDolu)
+            {
+                string gecenSure = "Yeni";
+                if (masa.AcilisZamani.HasValue)
+                {
+                    var fark = DateTime.Now - masa.AcilisZamani.Value;
+                    gecenSure = $"{Math.Floor(fark.TotalMinutes)} dk";
+                }
+
+                layout.Children.Add(new Label { Text = "DOLU", TextColor = Colors.White, FontSize = 12, HorizontalOptions = LayoutOptions.Center, Opacity = 0.8 });
+                layout.Children.Add(new BoxView { HeightRequest = 1, Color = Colors.White, Opacity = 0.3, Margin = new Thickness(0, 5) });
+                layout.Children.Add(new Label { Text = $"{masa.ToplamTutar:N2} â‚º", TextColor = Colors.White, FontSize = 18, FontAttributes = FontAttributes.Bold, HorizontalOptions = LayoutOptions.Center });
+                layout.Children.Add(new Label { Text = $"ðŸ•’ {gecenSure}", TextColor = Colors.White, FontSize = 12, HorizontalOptions = LayoutOptions.Center, Opacity = 0.9 });
+            }
+            else
+            {
+                layout.Children.Add(new Label { Text = "BOÅž", TextColor = Colors.White, FontSize = 14, HorizontalOptions = LayoutOptions.Center, Opacity = 0.9, Margin = new Thickness(0, 10, 0, 0) });
+            }
+
+            cardBorder.Content = layout;
+
+            // Karta TÄ±klama Ã–zelliÄŸi Ekleme
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += async (s, e) => {
                 await Navigation.PushAsync(new SiparisPage(masa));
             };
+            cardBorder.GestureRecognizers.Add(tapGesture);
 
-            MasalarContainer.Children.Add(masaButonu);
+            MasalarContainer.Children.Add(cardBorder);
         }
     }
 
-
-
-
-
-
-    private async void Masa_Clicked(object sender, EventArgs e)
-    {
-        var buton = (Button)sender;
-
-        // Casting iþlemini (Masa) olarak deðil, tam yolunu belirterek yapalým
-        if (buton.BindingContext is KafesonApp.Models.Masa secilenMasa)
-        {
-            // Sipariþ sayfasýna Masa objesini gönderiyoruz
-            await Navigation.PushAsync(new SiparisPage(secilenMasa));
-        }
-    }
-
-
-    // YENÝ BUTONUN KODU BURAYA (Sýnýfýn en altýna ama son parantezin içine)
     private async void AnaMenuyeGit_Clicked(object sender, EventArgs e)
     {
-        await Navigation.PopAsync(); //
+        await Navigation.PopAsync();
     }
 }

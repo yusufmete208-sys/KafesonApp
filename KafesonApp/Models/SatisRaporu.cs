@@ -1,18 +1,16 @@
-﻿namespace KafesonApp.Models
+﻿using System;
+
+namespace KafesonApp.Models
 {
     public class SatisRaporu
     {
-        public string UrunAd { get; set; }
-        public int Adet { get; set; }
-        public double Fiyat { get; set; }
-        public DateTime Tarih { get; set; }
-        public string OdemeTuru { get; set; }
         public int MasaNo { get; set; }
+        public string OdemeTuru { get; set; } = "";
+        public string UrunDetaylari { get; set; } = "";
+        public double Tutar { get; set; }
+        public DateTime Tarih { get; set; }
 
-        // XAML tarafı artık direkt birleştirilmiş metni gösterecek
-        public string UrunDetaylari => UrunAd;
-
-        // Fiyat alanında toplam tutarı tuttuğumuz için direkt onu döndürüyoruz
-        public double Tutar => Fiyat;
+        // YENİ EKLENEN KISIM: İşlemi Yapan Personel
+        public string PersonelAdi { get; set; } = "Bilinmiyor";
     }
 }

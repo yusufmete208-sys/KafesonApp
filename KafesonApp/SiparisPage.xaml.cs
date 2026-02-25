@@ -1,11 +1,16 @@
-using KafesonApp.Models;
+ï»¿using KafesonApp.Models;
+using KafesonApp.Data; // VeriServisi iÃ§in eklendi
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace KafesonApp;
 
 public partial class SiparisPage : ContentPage
 {
     public Masa SecilenMasa { get; set; }
+    private readonly VeriServisi _servis = new VeriServisi(); // Veri servisi tanÄ±mlandÄ±
+
+    bool isMobile = DeviceInfo.Idiom == DeviceIdiom.Phone;
 
     public SiparisPage(Masa masa)
     {
@@ -13,132 +18,239 @@ public partial class SiparisPage : ContentPage
         SecilenMasa = masa;
         BindingContext = this;
 
-        // Ayarlar sayfasýndan gelen verileri yükle
         KategorileriYukle();
-
-        // Varsa ilk kategoriyi otomatik göster
-        var ilkKat = App.Urunler.FirstOrDefault()?.Kategori;
-        if (!string.IsNullOrEmpty(ilkKat)) UrunleriGoster(ilkKat);
-
+        UrunleriGoster("TÃœMÃœ");
         DurumuGuncelle();
     }
 
-    // SiparisPage.xaml.cs içine bu metodu ekleyin veya güncelleyin
-    // SiparisPage.xaml.cs içinde OnAppearing metodunu güncelle
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        // Ödeme sayfasýndan dönüldüðünde rakamlarý ve listeyi tazeler
         DurumuGuncelle();
     }
 
     private void DurumuGuncelle()
     {
-        // Kalan borcu hesapla ve yaz
-        ToplamLabel.Text = $"{SecilenMasa.KalanTutar:N2} TL";
+        ToplamLabel.Text = $"{SecilenMasa.KalanTutar:N2} â‚º";
 
-        // Ödeme Al / Hesabý Kapat butonu kontrolü
         if (SecilenMasa.Sepet.Count > 0)
         {
-            AnaButon.Text = $"Sipariþi Onayla ({SecilenMasa.Sepet.Sum(x => x.ToplamFiyat):N2} TL)";
-            AnaButon.BackgroundColor = Colors.Green;
+            AnaButon.Text = $"SipariÅŸi Onayla ({SecilenMasa.Sepet.Sum(x => x.ToplamFiyat):N2} â‚º)";
+            AnaButon.BackgroundColor = Color.FromArgb("#E67E22");
         }
         else
         {
-            AnaButon.Text = SecilenMasa.KalanTutar > 0 ? $"Ödeme Al ({SecilenMasa.KalanTutar:N2} TL)" : "Hesabý Kapat";
-            AnaButon.BackgroundColor = Color.FromArgb("#2980B9");
+            AnaButon.Text = SecilenMasa.KalanTutar > 0.01 ? $"Ã–deme Al ({SecilenMasa.KalanTutar:N2} â‚º)" : "HesabÄ± Kapat";
+            AnaButon.BackgroundColor = Color.FromArgb("#27AE60");
         }
     }
-
-    // --- DÝNAMÝK ÜRÜN YÜKLEME (Ayarlar sayfasýndan gelen veriler) ---
 
     private void KategorileriYukle()
     {
         KategoriContainer.Children.Clear();
+        var btnTum = new Button
+        {
+            Text = "TÃœMÃœ",
+            HeightRequest = isMobile ? 40 : 60,
+            WidthRequest = isMobile ? 100 : -1,
+            Padding = new Thickness(15, 0),
+            BackgroundColor = Color.FromArgb("#3B82F6"),
+            TextColor = Colors.White,
+            FontAttributes = FontAttributes.Bold,
+            FontSize = isMobile ? 13 : 15,
+            CornerRadius = isMobile ? 20 : 12
+        };
+
+        btnTum.Clicked += (s, e) => {
+            KategoriRenkleriniSifirla();
+            btnTum.BackgroundColor = Color.FromArgb("#3B82F6");
+            UrunleriGoster("TÃœMÃœ");
+        };
+
+        KategoriContainer.Children.Add(btnTum);
         var kategoriler = App.Urunler.Select(x => x.Kategori).Distinct().ToList();
 
         foreach (var kat in kategoriler)
         {
-            var btn = new Button { Text = kat, Margin = 2, BackgroundColor = Color.FromArgb("#34495E"), TextColor = Colors.White };
-            btn.Clicked += (s, e) => UrunleriGoster(kat);
+            var btn = new Button
+            {
+                Text = kat,
+                HeightRequest = isMobile ? 40 : 60,
+                BackgroundColor = Color.FromArgb("#334155"),
+                TextColor = Colors.White,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = isMobile ? 13 : 15,
+                CornerRadius = isMobile ? 20 : 12
+            };
+            btn.Clicked += (s, e) => {
+                KategoriRenkleriniSifirla();
+                btn.BackgroundColor = Color.FromArgb("#3B82F6");
+                UrunleriGoster(kat);
+            };
             KategoriContainer.Children.Add(btn);
         }
+    }
+
+    private void KategoriRenkleriniSifirla()
+    {
+        foreach (var child in KategoriContainer.Children)
+            if (child is Button b) b.BackgroundColor = Color.FromArgb("#334155");
     }
 
     private void UrunleriGoster(string kategori)
     {
         UrunlerContainer.Children.Clear();
-        var urunler = App.Urunler.Where(x => x.Kategori == kategori).ToList();
+        var urunler = kategori == "TÃœMÃœ" ? App.Urunler.ToList() : App.Urunler.Where(x => x.Kategori == kategori).ToList();
 
         foreach (var urun in urunler)
         {
             var btn = new Button
             {
-                Text = $"{urun.Ad}\n{urun.Fiyat} TL",
-                WidthRequest = 120,
-                HeightRequest = 120,
-                Margin = 5,
+                Text = $"{urun.Ad}\n\n{urun.Fiyat:N2} â‚º",
+                WidthRequest = isMobile ? 165 : 140,
+                HeightRequest = isMobile ? 100 : 110,
+                Margin = new Thickness(0, 0, 0, 10),
                 BackgroundColor = Colors.White,
-                TextColor = Colors.Black,
-                FontAttributes = FontAttributes.Bold
+                TextColor = Color.FromArgb("#2C3E50"),
+                FontAttributes = FontAttributes.Bold,
+                FontSize = isMobile ? 13 : 14,
+                CornerRadius = 15,
+                BorderColor = Color.FromArgb("#E2E8F0"),
+                BorderWidth = 2
             };
 
             btn.Clicked += (s, e) => {
-                // 1. AYNI ÜRÜN SEPETTE VAR MI KONTROL ET
-                var mevcutUrun = SecilenMasa.Sepet.FirstOrDefault(x => x.Ad == urun.Ad);
-
-                if (mevcutUrun != null)
-                {
-                    // Varsa miktarýný artýr (Yeni satýr açmaz)
-                    mevcutUrun.Miktar++;
-                }
-                else
-                {
-                    // Yoksa yeni bir satýr olarak ekle
-                    SecilenMasa.Sepet.Add(new Urun { Ad = urun.Ad, Fiyat = urun.Fiyat, Miktar = 1 });
-                }
+                var sepettekiUrun = SecilenMasa.Sepet.FirstOrDefault(x => x.Ad == urun.Ad);
+                if (sepettekiUrun != null) sepettekiUrun.Miktar++;
+                else SecilenMasa.Sepet.Add(new Urun { Ad = urun.Ad, Fiyat = urun.Fiyat, Miktar = 1 });
                 DurumuGuncelle();
             };
             UrunlerContainer.Children.Add(btn);
         }
     }
 
-    // --- BUTON OLAYLARI (Event Handlers) ---
+    // --- KASA SENKRONÄ°ZASYONLU ANA Ä°ÅžLEMLER ---
 
     private async void AnaButon_Clicked(object sender, EventArgs e)
     {
-        // 1. DURUM: SEPETÝ ONAYLA
         if (SecilenMasa.Sepet.Count > 0)
         {
-            foreach (var urun in SecilenMasa.Sepet)
+            if (SecilenMasa.AcilisZamani == null) SecilenMasa.AcilisZamani = DateTime.Now;
+
+            foreach (var urun in SecilenMasa.Sepet.ToList())
             {
-                SecilenMasa.Siparisler.Add(urun);
-                App.MutfakSiparisleri.Add(new MutfakSiparisi
-                {
-                    MasaNo = SecilenMasa.No,
-                    UrunAd = urun.Ad,
-                    Miktar = urun.Miktar
-                });
+                var mevcutUrun = SecilenMasa.Siparisler.FirstOrDefault(x => x.Ad == urun.Ad);
+                if (mevcutUrun != null) mevcutUrun.Miktar += urun.Miktar;
+                else SecilenMasa.Siparisler.Add(new Urun { Ad = urun.Ad, Fiyat = urun.Fiyat, Miktar = urun.Miktar });
+
+                App.MutfakSiparisleri.Add(new MutfakSiparisi { MasaNo = SecilenMasa.No, UrunAd = urun.Ad, Miktar = urun.Miktar, KayitSaati = DateTime.Now });
             }
             SecilenMasa.Sepet.Clear();
             SecilenMasa.IsDolu = true;
+
+            // KASAYA GÃ–NDER
+#if ANDROID
+            await _servis.MasaGuncelle(SecilenMasa);
+#endif
             App.VerileriKaydet();
+            App.LogEkle("SipariÅŸ OnayÄ±", $"Masa {SecilenMasa.No} sipariÅŸleri mutfaÄŸa iletildi.");
+            await DisplayAlert("BaÅŸarÄ±lÄ±", "SipariÅŸler iletildi.", "Tamam");
         }
-        // 2. DURUM: ÖDEME AL
-        else if (SecilenMasa.KalanTutar > 0)
+        else if (SecilenMasa.KalanTutar > 0.01)
         {
-            await Navigation.PushModalAsync(new OdemePage(SecilenMasa));
+            await Navigation.PushAsync(new OdemePage(SecilenMasa));
         }
-        // 3. DURUM: HESABI KAPAT
         else
         {
+            // HESAP KAPATMA
+            foreach (var kalan in SecilenMasa.Siparisler)
+            {
+                var arsivUrun = SecilenMasa.KapanisUrunleri.FirstOrDefault(x => x.Ad == kalan.Ad);
+                if (arsivUrun != null) arsivUrun.Miktar += kalan.Miktar;
+                else SecilenMasa.KapanisUrunleri.Add(new Urun { Ad = kalan.Ad, Fiyat = kalan.Fiyat, Miktar = kalan.Miktar });
+            }
+
+            var yeniRapor = new SatisRaporu
+            {
+                MasaNo = SecilenMasa.No,
+                Tutar = SecilenMasa.NakitBirikim + SecilenMasa.KartBirikim,
+                Tarih = DateTime.Now,
+                PersonelAdi = App.AktifKullanici?.KullaniciAdi ?? "Admin"
+            };
+            App.SatisRaporlari.Add(yeniRapor);
+
             SecilenMasa.IsDolu = false;
             SecilenMasa.Siparisler.Clear();
+            SecilenMasa.NakitBirikim = 0;
+            SecilenMasa.KartBirikim = 0;
             SecilenMasa.OdenmisTutar = 0;
+
+            // KASAYA GÃ–NDER (Masa artÄ±k boÅŸaldÄ±)
+#if ANDROID
+            await _servis.MasaGuncelle(SecilenMasa);
+#endif
             App.VerileriKaydet();
-            await Navigation.PopAsync(); // Çökmeyi önleyen tekil navigasyon
+            await DisplayAlert("Hesap KapandÄ±", "Masa kapatÄ±ldÄ±.", "Tamam");
+            await Navigation.PopAsync();
         }
         DurumuGuncelle();
+    }
+
+    private async void MasaAktar_Clicked(object sender, EventArgs e)
+    {
+        if (SecilenMasa == null || !SecilenMasa.IsDolu) return;
+        var bosMasalar = App.Masalar.Where(m => !m.IsDolu).Select(m => $"Masa {m.No}").ToArray();
+        string secim = await DisplayActionSheet("Hedef Masa?", "Ä°ptal", null, bosMasalar);
+
+        if (secim != "Ä°ptal" && !string.IsNullOrEmpty(secim))
+        {
+            int hedefNo = int.Parse(secim.Replace("Masa ", ""));
+            var hedefMasa = App.Masalar.First(m => m.No == hedefNo);
+
+            // Verileri aktar
+            foreach (var urun in SecilenMasa.Siparisler.ToList()) hedefMasa.Siparisler.Add(urun);
+            hedefMasa.IsDolu = true;
+            SecilenMasa.IsDolu = false;
+            SecilenMasa.Siparisler.Clear();
+
+            // KASAYI GÃœNCELLE (Ä°ki masa da deÄŸiÅŸti)
+#if ANDROID
+            await _servis.MasaGuncelle(SecilenMasa);
+            await _servis.MasaGuncelle(hedefMasa);
+#endif
+            App.VerileriKaydet();
+            await Navigation.PopAsync();
+        }
+    }
+
+    private async void MasaBirlestir_Clicked(object sender, EventArgs e)
+    {
+        if (SecilenMasa == null || !SecilenMasa.IsDolu) return;
+        var doluMasalar = App.Masalar.Where(m => m.IsDolu && m.No != SecilenMasa.No).Select(m => $"Masa {m.No}").ToArray();
+        string secim = await DisplayActionSheet("Hangi Masa?", "Ä°ptal", null, doluMasalar);
+
+        if (secim != "Ä°ptal" && !string.IsNullOrEmpty(secim))
+        {
+            int hedefNo = int.Parse(secim.Replace("Masa ", ""));
+            var hedefMasa = App.Masalar.First(m => m.No == hedefNo);
+
+            foreach (var urun in SecilenMasa.Siparisler.ToList())
+            {
+                var mevcut = hedefMasa.Siparisler.FirstOrDefault(x => x.Ad == urun.Ad);
+                if (mevcut != null) mevcut.Miktar += urun.Miktar;
+                else hedefMasa.Siparisler.Add(urun);
+            }
+            SecilenMasa.IsDolu = false;
+            SecilenMasa.Siparisler.Clear();
+
+            // KASAYI GÃœNCELLE
+#if ANDROID
+            await _servis.MasaGuncelle(SecilenMasa);
+            await _servis.MasaGuncelle(hedefMasa);
+#endif
+            App.VerileriKaydet();
+            await Navigation.PopAsync();
+        }
     }
 
     private void MiktarArtir_Clicked(object sender, EventArgs e)

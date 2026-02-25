@@ -2,48 +2,51 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KafesonApp.MasalarPage"
-             Title="Salon Kat Planı"
-             BackgroundColor="#F4F7F6">
+             Title="Masa Planı"
+             BackgroundColor="#F0F4F8"
+             NavigationPage.HasNavigationBar="False">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
+    <Grid RowDefinitions="Auto, *, Auto">
 
-            <Label Text="KAFESON SALON PLANI" 
-                   FontSize="28" 
-                   FontAttributes="Bold" 
-                   TextColor="#2C3E50" 
-                   HorizontalOptions="Center" 
-                   Margin="0,10,0,20"/>
+        <Border Grid.Row="0" BackgroundColor="#1E293B" StrokeThickness="0" Padding="15,25,15,20">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0,0,25,25"/>
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="20">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Button Text="Geri Dön" Clicked="AnaMenuyeGit_Clicked" BackgroundColor="#334155" TextColor="White" CornerRadius="10" HeightRequest="40" Padding="15,0"/>
+                    <Label Grid.Column="1" Text="MASA PLANI" TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Grid>
 
-            <FlexLayout x:Name="MasalarContainer" 
-            Wrap="Wrap" 
-            JustifyContent="Center" 
-            AlignItems="Center" 
-            AlignContent="Start"
-            MinimumHeightRequest="500">
-            </FlexLayout>
+                <Border BackgroundColor="#0F172A" StrokeThickness="0" StrokeShape="RoundRectangle 12" HorizontalOptions="Center" Padding="4">
+                    <HorizontalStackLayout Spacing="0">
+                        <Button x:Name="BtnIcMekan" Text="🏠 İÇ MEKAN" Clicked="MekanSec_Clicked" CommandParameter="İç Mekan"
+                                BackgroundColor="#3B82F6" TextColor="White" WidthRequest="160" HeightRequest="45" CornerRadius="10" FontAttributes="Bold"/>
+                        <Button x:Name="BtnBahce" Text="🌳 BAHÇE" Clicked="MekanSec_Clicked" CommandParameter="Bahçe"
+                                BackgroundColor="Transparent" TextColor="#94A3B8" WidthRequest="160" HeightRequest="45" CornerRadius="10" FontAttributes="Bold"/>
+                    </HorizontalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </Border>
 
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20" Margin="0,20,0,10">
-                <HorizontalStackLayout Spacing="5">
-                    <BoxView Color="#2ECC71" WidthRequest="15" HeightRequest="15" CornerRadius="3"/>
-                    <Label Text="Boş" FontSize="12"/>
+        <ScrollView Grid.Row="1" Padding="15" VerticalScrollBarVisibility="Never">
+            <FlexLayout x:Name="MasalarContainer" Wrap="Wrap" JustifyContent="SpaceEvenly" AlignItems="Center" AlignContent="Start" />
+        </ScrollView>
+
+        <Border Grid.Row="2" BackgroundColor="White" StrokeThickness="0" Padding="15">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,-4" Radius="15" Opacity="0.05"/>
+            </Border.Shadow>
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="30">
+                <HorizontalStackLayout Spacing="8">
+                    <BoxView Color="#10B981" WidthRequest="16" HeightRequest="16" CornerRadius="8" VerticalOptions="Center"/>
+                    <Label Text="Boş Masa" FontSize="14" TextColor="#475569" FontAttributes="Bold" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="5">
-                    <BoxView Color="#E74C3C" WidthRequest="15" HeightRequest="15" CornerRadius="3"/>
-                    <Label Text="Dolu" FontSize="12"/>
+                <HorizontalStackLayout Spacing="8">
+                    <BoxView Color="#EF4444" WidthRequest="16" HeightRequest="16" CornerRadius="8" VerticalOptions="Center"/>
+                    <Label Text="Dolu Masa" FontSize="14" TextColor="#475569" FontAttributes="Bold" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
             </HorizontalStackLayout>
-
-            <Button Text="ANA MENÜYE GİT" 
-        Clicked="AnaMenuyeGit_Clicked"
-        BackgroundColor="#34495E" 
-        TextColor="White" 
-        CornerRadius="20"
-        HeightRequest="50"
-        WidthRequest="200"
-        HorizontalOptions="Center"
-        Margin="0,20"/>
-
-        </VerticalStackLayout>
-    </ScrollView>
+        </Border>
+    </Grid>
 </ContentPage>

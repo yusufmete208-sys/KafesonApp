@@ -1,48 +1,75 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:KafesonApp.Models"
              x:Class="KafesonApp.MasaYonetimView">
+    <VerticalStackLayout Padding="15" Spacing="20">
 
-    <Grid RowDefinitions="Auto, *" Padding="20" RowSpacing="20">
+        <Border BackgroundColor="White" StrokeThickness="0" Padding="20">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="15"/>
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.05"/>
+            </Border.Shadow>
 
-        <Frame Grid.Row="0" CornerRadius="10" BorderColor="#DCDDE1" Padding="15" BackgroundColor="White">
-            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
-                <Entry x:Name="MasaNoEntry" Placeholder="Masa No (Örn: 5)" Keyboard="Numeric" WidthRequest="150"/>
-                <Button Text="MASA EKLE" 
-                        Clicked="OnMasaEkleClicked" 
-                        BackgroundColor="#27AE60" TextColor="White" FontAttributes="Bold"/>
-            </HorizontalStackLayout>
-        </Frame>
+            <VerticalStackLayout Spacing="15">
+                <Label Text="➕ YENİ MASA EKLE" FontAttributes="Bold" FontSize="16" TextColor="#2C3E50"/>
 
-        <CollectionView Grid.Row="1" x:Name="MasaCollectionView">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="3" VerticalItemSpacing="10" HorizontalItemSpacing="10"/>
-            </CollectionView.ItemsLayout>
+                <Grid ColumnDefinitions="*, *, Auto" ColumnSpacing="10">
+                    <Border Grid.Column="0" BackgroundColor="#F8F9FA" Stroke="#E2E8F0" StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                        <Entry x:Name="MasaNoEntry" Placeholder="Masa No" Keyboard="Numeric" TextColor="#2C3E50" Margin="10,0"/>
+                    </Border>
 
+                    <Border Grid.Column="1" BackgroundColor="#F8F9FA" Stroke="#E2E8F0" StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                        <Picker x:Name="MekanPicker" Title="Mekan Seç" TextColor="#2C3E50" Margin="10,0">
+                            <Picker.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>İç Mekan</x:String>
+                                    <x:String>Bahçe</x:String>
+                                </x:Array>
+                            </Picker.ItemsSource>
+                        </Picker>
+                    </Border>
+
+                    <Button Grid.Column="2" Text="EKLE" Clicked="MasaEkle_Clicked" BackgroundColor="#27AE60" TextColor="White" FontAttributes="Bold" CornerRadius="8" Padding="20,0"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <Border BackgroundColor="#0F172A" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="4">
+            <Grid ColumnDefinitions="*, *">
+                <Button x:Name="BtnFiltreIcMekan" Text="🏠 İÇ MEKAN" Clicked="Filtrele_Clicked" CommandParameter="İç Mekan"
+                        BackgroundColor="#3B82F6" TextColor="White" HeightRequest="45" CornerRadius="10" FontAttributes="Bold"/>
+
+                <Button Grid.Column="1" x:Name="BtnFiltreBahce" Text="🌳 BAHÇE" Clicked="Filtrele_Clicked" CommandParameter="Bahçe"
+                        BackgroundColor="Transparent" TextColor="#94A3B8" HeightRequest="45" CornerRadius="10" FontAttributes="Bold"/>
+            </Grid>
+        </Border>
+
+        <CollectionView x:Name="MasaListesi" HeightRequest="400">
+            <CollectionView.EmptyView>
+                <Label Text="Bu alanda masa bulunmuyor." TextColor="Gray" HorizontalOptions="Center" Margin="20"/>
+            </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame HeightRequest="120" CornerRadius="12" BorderColor="#DCDDE1" HasShadow="False">
-                        <Frame.Triggers>
-                            <DataTrigger TargetType="Frame" Binding="{Binding IsDolu}" Value="True">
-                                <Setter Property="BackgroundColor" Value="#FAB1A0"/>
-                            </DataTrigger>
-                            <DataTrigger TargetType="Frame" Binding="{Binding IsDolu}" Value="False">
-                                <Setter Property="BackgroundColor" Value="#F1F2F6"/>
-                            </DataTrigger>
-                        </Frame.Triggers>
+                <DataTemplate x:DataType="models:Masa">
+                    <Border BackgroundColor="White" StrokeThickness="1" Stroke="#E2E8F0" StrokeShape="RoundRectangle 10" Padding="15" Margin="0,0,0,10">
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <Border Grid.Column="0" BackgroundColor="#E8F6F3" StrokeThickness="0" StrokeShape="RoundRectangle 8" WidthRequest="45" HeightRequest="45" VerticalOptions="Center">
+                                <Label Text="🍽️" HorizontalOptions="Center" VerticalOptions="Center" FontSize="20"/>
+                            </Border>
 
-                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                            <Label Text="{Binding No, StringFormat='Masa {0}'}" FontAttributes="Bold" TextColor="#2F3640"/>
-                            <Label Text="{Binding KalanTutar, StringFormat='{0:N2} TL'}" FontSize="12" TextColor="Gray"/>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0">
+                                <Label Text="{Binding No, StringFormat='Masa {0}'}" FontAttributes="Bold" FontSize="16" TextColor="#2C3E50"/>
+                                <Label Text="{Binding Mekan}" FontSize="12" TextColor="#7F8C8D"/>
+                            </VerticalStackLayout>
 
-                            <Button Text="SİL" 
-                                    Clicked="OnMasaSilClicked" 
-                                    CommandParameter="{Binding .}"
-                                    BackgroundColor="#E74C3C" TextColor="White" Scale="0.8" Margin="0,5,0,0"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                            <Button Grid.Column="2" Text="SİL" Clicked="MasaSil_Clicked" CommandParameter="{Binding .}" BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" CornerRadius="8" HeightRequest="40" Padding="15,0" VerticalOptions="Center"/>
+                        </Grid>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </Grid>
+
+    </VerticalStackLayout>
 </ContentView>

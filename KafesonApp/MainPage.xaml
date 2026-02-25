@@ -4,37 +4,102 @@
              x:Class="KafesonApp.MainPage"
              NavigationPage.HasNavigationBar="False">
 
-    <Grid ColumnDefinitions="250, *">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{OnIdiom Phone='Auto', Desktop='*'}" />
+            <RowDefinition Height="{OnIdiom Phone='*', Desktop='0'}" />
+        </Grid.RowDefinitions>
 
-        <Border Grid.Column="0" BackgroundColor="#2C3E50" StrokeThickness="0">
-            <ScrollView>
-                <VerticalStackLayout Grid.Column="0" BackgroundColor="#2C3E50" Padding="20" Spacing="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{OnIdiom Phone='*', Desktop='250'}" />
+            <ColumnDefinition Width="{OnIdiom Phone='0', Desktop='*'}" />
+        </Grid.ColumnDefinitions>
 
-                    <Label Text="KAFESON" FontSize="32" FontAttributes="Bold" TextColor="White" 
-           HorizontalOptions="Center" Margin="0,40,0,40"/>
+        <Border Grid.Column="0" Grid.Row="0" 
+                BackgroundColor="{OnIdiom Phone='#1E293B', Desktop='#2C3E50'}" 
+                StrokeThickness="0"
+                Padding="{OnIdiom Phone='10,30,10,20', Desktop='0'}">
 
-                    <Button Text="Masalar" Clicked="Masalar_Clicked"
-            BackgroundColor="#34495E" TextColor="White" HeightRequest="60" CornerRadius="10"/>
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="{OnIdiom Phone='0,0,30,30', Desktop='0'}"/>
+            </Border.StrokeShape>
 
-                    <Button Text="Raporları Görüntüle" Clicked="Raporlar_Clicked"
-            BackgroundColor="#34495E" TextColor="White" HeightRequest="60" CornerRadius="10"/>
+            <ScrollView Orientation="Vertical">
+                <VerticalStackLayout Padding="{OnIdiom Phone='10', Desktop='20'}" Spacing="15">
 
-                    <Button Text="Ayarlar ve Yönetim" Clicked="Ayarlar_Clicked"
-            BackgroundColor="#34495E" TextColor="White" HeightRequest="60" CornerRadius="10"/>
+                    <Label Text="KAFESON" 
+                           FontSize="{OnIdiom Phone='28', Desktop='32'}" 
+                           FontAttributes="Bold" 
+                           TextColor="White" 
+                           HorizontalOptions="Center" 
+                           Margin="{OnIdiom Phone='0,0,0,10', Desktop='0,40,0,40'}"/>
+
+                    <FlexLayout Wrap="{OnIdiom Phone='Wrap', Desktop='NoWrap'}" 
+                                Direction="{OnIdiom Phone='Row', Desktop='Column'}"
+                                JustifyContent="SpaceEvenly"
+                                AlignItems="Center">
+
+                        <Button x:Name="BtnMasalar" 
+                                Text="🍽️ Masalar" Clicked="Masalar_Clicked"
+                                BackgroundColor="#27AE60" TextColor="White" FontAttributes="Bold"
+                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
+                                CornerRadius="15"
+                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
+                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
+
+                        <Button x:Name="BtnMutfak"
+                                Text="👨‍🍳 Mutfak" Clicked="Mutfak_Clicked" 
+                                BackgroundColor="#E67E22" TextColor="White" FontAttributes="Bold"
+                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
+                                CornerRadius="15" 
+                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
+                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
+
+                        <Button x:Name="BtnRaporlar" 
+                                Text="📊 Raporlar" Clicked="Raporlar_Clicked"
+                                BackgroundColor="#34495E" TextColor="White" FontAttributes="Bold"
+                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
+                                CornerRadius="15"
+                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
+                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
+
+                        <Button x:Name="BtnAyarlar" 
+                                Text="⚙️ Ayarlar" Clicked="Ayarlar_Clicked"
+                                BackgroundColor="#34495E" TextColor="White" FontAttributes="Bold"
+                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
+                                CornerRadius="15"
+                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
+                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
+                    </FlexLayout>
+
+                    <Button Text="🚪 Çıkış Yap" Clicked="Cikis_Clicked"
+                            BackgroundColor="#C0392B" TextColor="White" FontAttributes="Bold"
+                            HeightRequest="50" CornerRadius="10"
+                            WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
+                            HorizontalOptions="Center"
+                            Margin="{OnIdiom Phone='0,15,0,0', Desktop='0,50,0,0'}"/>
 
                 </VerticalStackLayout>
-                
             </ScrollView>
         </Border>
 
-        <ScrollView Grid.Column="1" BackgroundColor="#F5F6FA">
-            <VerticalStackLayout Padding="40" Spacing="30">
+        <ScrollView Grid.Column="{OnIdiom Phone='0', Desktop='1'}" 
+                    Grid.Row="{OnIdiom Phone='1', Desktop='0'}" 
+                    BackgroundColor="#F5F6FA">
+            <VerticalStackLayout Padding="{OnIdiom Phone='20', Desktop='40'}" Spacing="20">
 
-                <Label Text="KAMPÜS BAHCE KAFE UYGULAMASI" 
+                <Label x:Name="KullaniciLabel"
+                       Text="Hoş Geldiniz"
+                       HorizontalOptions="Center"
+                       FontSize="16"
+                       TextColor="Gray"/>
+
+                <Label Text="KAMPÜS BAHÇE KAFE UYGULAMASI" 
                        HorizontalOptions="Center" 
-                       FontSize="28" 
+                       FontSize="{OnIdiom Phone='20', Desktop='28'}" 
                        FontAttributes="Bold" 
-                       TextColor="#2C3E50" />
+                       TextColor="#2C3E50" 
+                       HorizontalTextAlignment="Center"/>
 
                 <FlexLayout x:Name="MasaContainer" 
                             Wrap="Wrap" 

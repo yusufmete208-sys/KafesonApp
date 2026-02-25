@@ -1,65 +1,82 @@
-using KafesonApp.Models;
+ï»¿using KafesonApp.Models;
+using System.Linq;
 
 namespace KafesonApp;
 
-public partial class MasaYonetimView : ContentView
+public partial class MasaYonetimView : ContentView // i harfi silindi
 {
-    public MasaYonetimView()
+    string _seciliMekan = "Ä°Ã§ Mekan";
+
+    public MasaYonetimView() // i harfi silindi
     {
         InitializeComponent();
-        MasaListesiniYenile();
+        MekanPicker.SelectedIndex = 0;
+
+        if (App.Masalar != null) ListeGuncelle();
     }
 
-    private void MasaListesiniYenile()
+    private void MasaEkle_Clicked(object sender, EventArgs e)
     {
-        if (App.Masalar == null) return;
-
-        // Masalarý numarasýna göre sýralayarak listele
-        MasaCollectionView.ItemsSource = null;
-        MasaCollectionView.ItemsSource = App.Masalar.OrderBy(x => x.No).ToList();
-    }
-
-    private async void OnMasaEkleClicked(object sender, EventArgs e)
-    {
-        if (!int.TryParse(MasaNoEntry.Text, out int masaNo))
+        if (int.TryParse(MasaNoEntry.Text, out int no) && MekanPicker.SelectedItem != null)
         {
-            await Application.Current.MainPage.DisplayAlert("Uyarý", "Geçerli bir numara girin.", "Tamam");
+            string mekan = MekanPicker.SelectedItem.ToString();
+
+            if (App.Masalar.Any(x => x.No == no && x.Mekan == mekan))
+            {
+                Application.Current.MainPage.DisplayAlert("Hata", "Bu masa numarasÄ± zaten mevcut!", "Tamam");
+                return;
+            }
+
+            App.Masalar.Add(new Masa { No = no, Mekan = mekan, IsDolu = false });
+            App.VerileriKaydet();
+
+            MasaNoEntry.Text = "";
+            ListeGuncelle();
+        }
+        else
+        {
+            Application.Current.MainPage.DisplayAlert("UyarÄ±", "GeÃ§erli bir masa numarasÄ± giriniz.", "Tamam");
+        }
+    }
+
+    private void Filtrele_Clicked(object sender, EventArgs e)
+    {
+        var buton = (Button)sender;
+        _seciliMekan = buton.CommandParameter.ToString();
+
+        BtnFiltreIcMekan.BackgroundColor = _seciliMekan == "Ä°Ã§ Mekan" ? Color.FromArgb("#3B82F6") : Colors.Transparent;
+        BtnFiltreIcMekan.TextColor = _seciliMekan == "Ä°Ã§ Mekan" ? Colors.White : Color.FromArgb("#94A3B8");
+
+        BtnFiltreBahce.BackgroundColor = _seciliMekan == "BahÃ§e" ? Color.FromArgb("#3B82F6") : Colors.Transparent;
+        BtnFiltreBahce.TextColor = _seciliMekan == "BahÃ§e" ? Colors.White : Color.FromArgb("#94A3B8");
+
+        ListeGuncelle();
+    }
+
+    private void ListeGuncelle()
+    {
+        MasaListesi.ItemsSource = App.Masalar
+            .Where(x => x.Mekan == _seciliMekan)
+            .OrderBy(x => x.No)
+            .ToList();
+    }
+
+    private async void MasaSil_Clicked(object sender, EventArgs e)
+    {
+        var masa = (Masa)((Button)sender).CommandParameter;
+
+        if (masa.IsDolu)
+        {
+            await Application.Current.MainPage.DisplayAlert("Hata", "MÃ¼ÅŸteri olan (dolu) bir masayÄ± silemezsiniz. Ã–nce hesabÄ± kapatÄ±n.", "Tamam");
             return;
         }
 
-        // Ayný numara kontrolü
-        if (App.Masalar.Any(x => x.No == masaNo))
-        {
-            await Application.Current.MainPage.DisplayAlert("Hata", "Bu masa zaten mevcut.", "Tamam");
-            return;
-        }
-
-        // Yeni masayý ekle
-        App.Masalar.Add(new Masa { No = masaNo, IsDolu = false });
-        App.VerileriKaydet(); // JSON'a kalýcý olarak kaydet
-
-        MasaNoEntry.Text = string.Empty;
-        MasaListesiniYenile();
-    }
-
-    private async void OnMasaSilClicked(object sender, EventArgs e)
-    {
-        var btn = (Button)sender;
-        var masa = (Masa)btn.CommandParameter;
-
-        // Dolu masa korumasý
-        if (masa.IsDolu || (masa.Siparisler != null && masa.Siparisler.Count > 0))
-        {
-            await Application.Current.MainPage.DisplayAlert("Uyarý", "Dolu veya hesabý olan masa silinemez!", "Tamam");
-            return;
-        }
-
-        bool onay = await Application.Current.MainPage.DisplayAlert("Onay", $"Masa {masa.No} silinsin mi?", "Evet", "Hayýr");
+        bool onay = await Application.Current.MainPage.DisplayAlert("Onay", $"Masa {masa.No} silinecek, emin misiniz?", "Evet", "HayÄ±r");
         if (onay)
         {
             App.Masalar.Remove(masa);
-            App.VerileriKaydet(); // Deðiþikliði kaydet
-            MasaListesiniYenile();
+            App.VerileriKaydet();
+            ListeGuncelle();
         }
     }
 }

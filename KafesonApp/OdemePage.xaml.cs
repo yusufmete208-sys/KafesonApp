@@ -1,113 +1,153 @@
-using KafesonApp.Models;
+ï»¿using KafesonApp.Models;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 
 namespace KafesonApp;
 
+public class OdemeUrunu : INotifyPropertyChanged
+{
+    public Urun OrijinalUrun { get; set; }
+    public string Ad => OrijinalUrun.Ad;
+    public double Fiyat => OrijinalUrun.Fiyat;
+    public int ToplamAdet => OrijinalUrun.Miktar;
+
+    private int _secilenAdet;
+    public int SecilenAdet
+    {
+        get => _secilenAdet;
+        set { _secilenAdet = value; OnPropertyChanged(nameof(SecilenAdet)); }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+}
+
 public partial class OdemePage : ContentPage
 {
-    Masa _masa;
+    private Masa _masa;
+    public ObservableCollection<OdemeUrunu> OdemeListesi { get; set; }
 
     public OdemePage(Masa masa)
     {
         InitializeComponent();
         _masa = masa;
-        BindingContext = _masa;
 
-        // Baþlangýçta tüm ürünlerin ödenecek adedini 0 yap ki seçim temiz baþlasýn
+        KalanLabel.Text = $"{_masa.KalanTutar:N2} â‚º";
+
+        OdemeListesi = new ObservableCollection<OdemeUrunu>();
+        ListeyiDoldur();
+        UrunlerView.ItemsSource = OdemeListesi;
+    }
+
+    private void ListeyiDoldur()
+    {
+        OdemeListesi.Clear();
         foreach (var urun in _masa.Siparisler)
         {
-            urun.OdenecekAdet = 0;
-            urun.IsSecili = false;
+            OdemeListesi.Add(new OdemeUrunu { OrijinalUrun = urun, SecilenAdet = 0 });
         }
-
-        // Ýlk açýlýþta toplam borcu göster
-        if (OdenecekTutarLabel != null)
-            OdenecekTutarLabel.Text = _masa.KalanTutar.ToString("N2");
     }
 
-    // --- SARI "1" BUTONU: HIZLI ÞEKÝLDE 1 ADET ÖDEME SEÇER ---
-    private void HizliMiktar_Clicked(object sender, EventArgs e)
+    private void Arti_Clicked(object sender, EventArgs e)
     {
-        var urun = (Urun)((Button)sender).CommandParameter;
-        if (urun != null && urun.Miktar > 0)
+        if (sender is Button btn && btn.CommandParameter is OdemeUrunu u)
         {
-            urun.OdenecekAdet = 1; // Sadece 1 adet öde
-            urun.IsSecili = true;
-            TutarGuncelle();
+            if (u.SecilenAdet < u.ToplamAdet)
+            {
+                u.SecilenAdet++;
+                Hesapla();
+            }
         }
     }
 
-    // --- MÝKTAR ARTIR (+) ---
-    private void OdenenMiktarArtir_Clicked(object sender, EventArgs e)
+    private void Eksi_Clicked(object sender, EventArgs e)
     {
-        var urun = (Urun)((Button)sender).CommandParameter;
-        if (urun != null && urun.OdenecekAdet < urun.Miktar)
+        if (sender is Button btn && btn.CommandParameter is OdemeUrunu u)
         {
-            urun.OdenecekAdet++; // Mevcut miktardan fazlasýný ödeyemezsin
-            urun.IsSecili = true;
-            TutarGuncelle();
+            if (u.SecilenAdet > 0)
+            {
+                u.SecilenAdet--;
+                Hesapla();
+            }
         }
     }
 
-    // --- MÝKTAR AZALT (-) ---
-    private void OdenenMiktarAzalt_Clicked(object sender, EventArgs e)
+    private void Hesapla()
     {
-        var urun = (Urun)((Button)sender).CommandParameter;
-        if (urun != null && urun.OdenecekAdet > 0)
+        double toplam = OdemeListesi.Sum(x => x.SecilenAdet * x.Fiyat);
+        SecilenTutarLabel.Text = $"{toplam:N2} â‚º";
+
+        if (toplam > 0) AlinanTutarEntry.Text = "";
+    }
+
+    private void Nakit_Clicked(object sender, EventArgs e) => OdemeIsleminiYap("Nakit");
+    private void Kart_Clicked(object sender, EventArgs e) => OdemeIsleminiYap("Kart");
+
+    private async void OdemeIsleminiYap(string tur)
+    {
+        double secilenUrunTutari = OdemeListesi.Sum(x => x.SecilenAdet * x.Fiyat);
+        double islemTutari = 0;
+        bool urunBazliOdeme = false;
+
+        if (secilenUrunTutari > 0)
         {
-            urun.OdenecekAdet--;
-            if (urun.OdenecekAdet == 0) urun.IsSecili = false;
-            TutarGuncelle();
+            islemTutari = secilenUrunTutari;
+            urunBazliOdeme = true;
         }
-    }
-
-    // --- CHECKBOX DEÐÝÞÝMÝ ---
-    private void SecimDegisti(object sender, CheckedChangedEventArgs e)
-    {
-        var checkbox = (CheckBox)sender;
-        var urun = (Urun)checkbox.BindingContext;
-
-        if (urun != null)
+        else if (double.TryParse(AlinanTutarEntry.Text, out double manuelTutar))
         {
-            // Eðer kutucuk iþaretlendiyse ve miktar 0 ise, otomatik olarak tümünü ödet
-            if (urun.IsSecili && urun.OdenecekAdet == 0)
-                urun.OdenecekAdet = urun.Miktar;
-            else if (!urun.IsSecili)
-                urun.OdenecekAdet = 0;
-
-            TutarGuncelle();
+            islemTutari = manuelTutar;
         }
-    }
-    private void TutarGuncelle()
-    {
-        // Hesaplama: Seçilen ürünlerin (ÖdenecekAdet * BirimFiyat) toplamý
-        double toplam = _masa.Siparisler.Where(x => x.IsSecili).Sum(x => x.OdenecekAdet * x.Fiyat);
-        OdenecekTutarLabel.Text = toplam > 0 ? toplam.ToString("N2") : _masa.KalanTutar.ToString("N2");
-    }
-    private async void OdemeYap_Clicked(object sender, EventArgs e)
-    {
-        if (!double.TryParse(OdenecekTutarLabel.Text, out double tutar) || tutar <= 0) return;
-
-        string tip = ((Button)sender).CommandParameter.ToString();
-
-        // 1. ADÝSYONDAN DÜÞME: 4 kahveden 2'sini düþ
-        var seciliUrunler = _masa.Siparisler.Where(x => x.IsSecili).ToList();
-        foreach (var urun in seciliUrunler)
+        else
         {
-            urun.Miktar -= urun.OdenecekAdet; // 4 - 2 = 2 kalýr
-
-            if (urun.Miktar <= 0) _masa.Siparisler.Remove(urun); // Hepsi bittiyse sil
-
-            urun.OdenecekAdet = 0; // Sýfýrla
-            urun.IsSecili = false;
+            await DisplayAlert("UyarÄ±", "LÃ¼tfen Ã¶denecek Ã¼rÃ¼nleri seÃ§in veya bir tutar girin.", "Tamam");
+            return;
         }
 
-        // 2. Raporu Kaydet (Masa.KalanTutar otomatik olarak listeden düþen miktar kadar azalacaktýr)
-        App.SatisRaporlari.Add(new SatisRaporu { MasaNo = _masa.No, Fiyat = tutar, OdemeTuru = tip, Tarih = DateTime.Now });
+        if (islemTutari <= 0 || islemTutari > _masa.KalanTutar + 0.1)
+        {
+            await DisplayAlert("Hata", "GeÃ§ersiz veya kalan hesaptan fazla bir tutar girdiniz.", "Tamam");
+            return;
+        }
 
+        if (tur == "Nakit") _masa.NakitBirikim += islemTutari;
+        else _masa.KartBirikim += islemTutari;
+
+        if (urunBazliOdeme)
+        {
+            foreach (var odemeUrunu in OdemeListesi.Where(x => x.SecilenAdet > 0))
+            {
+                var kapanisUrunu = _masa.KapanisUrunleri.FirstOrDefault(x => x.Ad == odemeUrunu.Ad);
+                if (kapanisUrunu != null) kapanisUrunu.Miktar += odemeUrunu.SecilenAdet;
+                else _masa.KapanisUrunleri.Add(new Urun { Ad = odemeUrunu.Ad, Fiyat = odemeUrunu.Fiyat, Miktar = odemeUrunu.SecilenAdet });
+
+                var masaUrunu = _masa.Siparisler.FirstOrDefault(x => x.Ad == odemeUrunu.Ad);
+                if (masaUrunu != null)
+                {
+                    masaUrunu.Miktar -= odemeUrunu.SecilenAdet;
+                    if (masaUrunu.Miktar <= 0) _masa.Siparisler.Remove(masaUrunu);
+                }
+            }
+        }
+        else
+        {
+            _masa.OdenmisTutar += islemTutari;
+        }
+
+        _masa.YenidenHesapla();
         App.VerileriKaydet();
-        await Navigation.PopModalAsync(); // Geri dön
+
+        // ðŸŸ¢ SÄ°STEME LOG EKLÄ°YORUZ ðŸŸ¢
+        App.LogEkle("Ã–deme AlÄ±ndÄ±", $"Masa {_masa.No}'dan {islemTutari:N2} â‚º tutarÄ±nda {tur} Ã¶demesi alÄ±ndÄ±.");
+
+        await DisplayAlert("BaÅŸarÄ±lÄ±", $"{islemTutari:N2} â‚º {tur} Ã¶demesi alÄ±ndÄ±.", "Tamam");
+
+        KalanLabel.Text = $"{_masa.KalanTutar:N2} â‚º";
+        AlinanTutarEntry.Text = "";
+        SecilenTutarLabel.Text = "0.00 â‚º";
+        ListeyiDoldur();
     }
 
-    private async void Kapat_Clicked(object sender, EventArgs e) => await Navigation.PopModalAsync();
+    private async void Iptal_Clicked(object sender, EventArgs e) => await Navigation.PopAsync();
 }

@@ -1,5 +1,4 @@
-using KafesonApp.Models; // Eðer Models klasörünüz yoksa bu satýrý da silebilirsiniz.
-using System.Collections.ObjectModel;
+ï»¿using KafesonApp.Models;
 
 namespace KafesonApp;
 
@@ -8,13 +7,19 @@ public partial class AyarlarPage : ContentPage
     public AyarlarPage()
     {
         InitializeComponent();
+
+        // --- GÃœVENLÄ°K KONTROLÃœ ---
+        // EÄŸer giriÅŸ yapan yoksa veya 'AyarlarYetkisi' (YÃ¶netim Paneli) izni yoksa iÃ§eri alma.
+        if (App.AktifKullanici == null || !App.AktifKullanici.AyarlarYetkisi)
+        {
+            DisplayAlert("Yetkisiz GiriÅŸ", "Bu alana giriÅŸ yetkiniz bulunmamaktadÄ±r.", "Tamam");
+            Navigation.PopAsync(); // Ana menÃ¼ye geri at
+        }
     }
 
     private async void MenuSec_Clicked(object sender, EventArgs e)
     {
-        // Test amaçlý bu satýrý ekle. Eðer bu mesaj geliyorsa buton çalýþýyor demektir.
-        // await DisplayAlert("Test", "Butona basýldý!", "Tamam");
-
+        // TÄ±klanan butonu ve parametresini alÄ±yoruz
         if (sender is not Button btn || btn.CommandParameter == null) return;
 
         string secim = btn.CommandParameter.ToString();
@@ -24,33 +29,49 @@ public partial class AyarlarPage : ContentPage
             switch (secim)
             {
                 case "MenuListesi":
+                    // SaÄŸ taraftaki alana (ContentArea) MenÃ¼ Listesini getirir
                     ContentArea.Content = new MenuGosterimView();
                     break;
-                    
+
                 case "YeniKayit":
+                    // ÃœrÃ¼n Ekleme ekranÄ±nÄ± getirir
                     ContentArea.Content = new YeniUrunKayitView();
                     break;
+
                 case "MasaDuzenle":
+                    // Masa Ekle/Ã‡Ä±kar ekranÄ±nÄ± getirir
                     ContentArea.Content = new MasaYonetimView();
                     break;
-                case "FiyatGuncelle": // XAML'daki CommandParameter ile ayný olmalý
-                                      // Yeni oluþturduðumuz FiyatRevizeView'ý buraya baðlýyoruz
+
+                case "FiyatGuncelle":
+                    // Fiyat GÃ¼ncelleme ekranÄ±nÄ± getirir
                     ContentArea.Content = new FiyatRevizeView();
                     break;
+
+                case "PersonelKontrol":
+                    // Personel YÃ¶netimi sayfasÄ± tam ekran aÃ§Ä±lÄ±r
+                    await Navigation.PushAsync(new KullaniciYonetimPage());
+                    break;
+
+                case "KapananMasalar":
+                    // Kapanan Masalar (GeÃ§miÅŸ) sayfasÄ± tam ekran aÃ§Ä±lÄ±r
+                    await Navigation.PushAsync(new KapananMasalar1View());
+                    break;
+
+                case "SistemLoglari":
+                    // ðŸŸ¢ YENÄ° EKLENEN: Sistem LoglarÄ± sayfasÄ± tam ekran aÃ§Ä±lÄ±r
+                    await Navigation.PushAsync(new SistemLogsPage());
+                    break;
+
                 case "Geri":
+                    // Ana Sayfaya (MainPage) geri dÃ¶ner
                     await Navigation.PopAsync();
                     break;
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Hata", "Görünüm yüklenemedi: " + ex.Message, "Tamam");
+            await DisplayAlert("Hata", "Sayfa yÃ¼klenirken bir sorun oluÅŸtu: " + ex.Message, "Tamam");
         }
-    }
-
-    private async void AnaSayfaDon_Clicked(object sender, EventArgs e)
-    {
-        // Bir önceki sayfaya (MainPage) geri döner
-        await Navigation.PopAsync();
     }
 }
