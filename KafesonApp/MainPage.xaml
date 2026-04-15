@@ -2,112 +2,157 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KafesonApp.MainPage"
-             NavigationPage.HasNavigationBar="False">
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="#F1F5F9">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="{OnIdiom Phone='Auto', Desktop='*'}" />
-            <RowDefinition Height="{OnIdiom Phone='*', Desktop='0'}" />
-        </Grid.RowDefinitions>
+    <ContentPage.Resources>
+        <Style TargetType="Border" x:Key="GlassCardStyle">
+            <Setter Property="StrokeThickness" Value="0.5"/>
+            <Setter Property="Stroke" Value="#50FFFFFF"/>
+            <Setter Property="StrokeShape" Value="RoundRectangle 32"/>
+            <Setter Property="BackgroundColor" Value="#CCFFFFFF"/>
+            <Setter Property="Padding" Value="{OnIdiom Phone='16,16', Desktop='25'}"/>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{OnIdiom Phone='*', Desktop='250'}" />
-            <ColumnDefinition Width="{OnIdiom Phone='0', Desktop='*'}" />
-        </Grid.ColumnDefinitions>
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <VisualState.Setters>
+                                <Setter Property="Scale" Value="1.0" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="PointerOver">
+                            <VisualState.Setters>
+                                <Setter Property="Scale" Value="1.03" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="Scale" Value="0.96" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+    </ContentPage.Resources>
 
-        <Border Grid.Column="0" Grid.Row="0" 
-                BackgroundColor="{OnIdiom Phone='#1E293B', Desktop='#2C3E50'}" 
-                StrokeThickness="0"
-                Padding="{OnIdiom Phone='10,30,10,20', Desktop='0'}">
+    <Grid RowDefinitions="Auto, *">
 
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="{OnIdiom Phone='0,0,30,30', Desktop='0'}"/>
-            </Border.StrokeShape>
+        <Border Grid.Row="0" BackgroundColor="#AAFFFFFF" 
+                Margin="{OnIdiom Phone='15,15,15,5', Desktop='20,30,20,10'}" 
+                StrokeThickness="0" StrokeShape="RoundRectangle 20">
+            <Border.Shadow>
+                <Shadow Brush="#CBD5E1" Offset="0,4" Radius="8" Opacity="0.1"/>
+            </Border.Shadow>
 
-            <ScrollView Orientation="Vertical">
-                <VerticalStackLayout Padding="{OnIdiom Phone='10', Desktop='20'}" Spacing="15">
-
-                    <Label Text="KAFESON" 
-                           FontSize="{OnIdiom Phone='28', Desktop='32'}" 
-                           FontAttributes="Bold" 
-                           TextColor="White" 
-                           HorizontalOptions="Center" 
-                           Margin="{OnIdiom Phone='0,0,0,10', Desktop='0,40,0,40'}"/>
-
-                    <FlexLayout Wrap="{OnIdiom Phone='Wrap', Desktop='NoWrap'}" 
-                                Direction="{OnIdiom Phone='Row', Desktop='Column'}"
-                                JustifyContent="SpaceEvenly"
-                                AlignItems="Center">
-
-                        <Button x:Name="BtnMasalar" 
-                                Text="🍽️ Masalar" Clicked="Masalar_Clicked"
-                                BackgroundColor="#27AE60" TextColor="White" FontAttributes="Bold"
-                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
-                                CornerRadius="15"
-                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
-                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
-
-                        <Button x:Name="BtnMutfak"
-                                Text="👨‍🍳 Mutfak" Clicked="Mutfak_Clicked" 
-                                BackgroundColor="#E67E22" TextColor="White" FontAttributes="Bold"
-                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
-                                CornerRadius="15" 
-                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
-                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
-
-                        <Button x:Name="BtnRaporlar" 
-                                Text="📊 Raporlar" Clicked="Raporlar_Clicked"
-                                BackgroundColor="#34495E" TextColor="White" FontAttributes="Bold"
-                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
-                                CornerRadius="15"
-                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
-                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
-
-                        <Button x:Name="BtnAyarlar" 
-                                Text="⚙️ Ayarlar" Clicked="Ayarlar_Clicked"
-                                BackgroundColor="#34495E" TextColor="White" FontAttributes="Bold"
-                                HeightRequest="{OnIdiom Phone='80', Desktop='60'}" 
-                                CornerRadius="15"
-                                WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
-                                Margin="{OnIdiom Phone='5', Desktop='0,0,0,15'}"/>
-                    </FlexLayout>
-
-                    <Button Text="🚪 Çıkış Yap" Clicked="Cikis_Clicked"
-                            BackgroundColor="#C0392B" TextColor="White" FontAttributes="Bold"
-                            HeightRequest="50" CornerRadius="10"
-                            WidthRequest="{OnIdiom Phone='160', Desktop='210'}"
-                            HorizontalOptions="Center"
-                            Margin="{OnIdiom Phone='0,15,0,0', Desktop='0,50,0,0'}"/>
-
+            <Grid ColumnDefinitions="*, Auto" Padding="{OnIdiom Phone='16,12', Desktop='25,15'}">
+                <VerticalStackLayout Grid.Column="0" Spacing="0" VerticalOptions="Center">
+                    <Label Text="KAFESON" FontSize="{OnIdiom Phone='24', Desktop='36'}" FontAttributes="Bold" TextColor="#0F172A"/>
+                    <Label x:Name="KullaniciLabel" Text="Kampüs Bahçe - Admin Paneli" FontSize="{OnIdiom Phone='12', Desktop='14'}" TextColor="#64748B"/>
                 </VerticalStackLayout>
-            </ScrollView>
+
+                <Button Grid.Column="1" Clicked="Cikis_Clicked" 
+                        Text="{OnIdiom Phone='🚪', Desktop='🚪 Çıkış'}"
+                        BackgroundColor="#FEE2E2" TextColor="#B91C1C" FontAttributes="Bold" CornerRadius="12" 
+                        Padding="{OnIdiom Phone='0', Desktop='20,0'}"
+                        WidthRequest="{OnIdiom Phone='44', Desktop='-1'}"
+                        HeightRequest="{OnIdiom Phone='44', Desktop='50'}" 
+                        HorizontalOptions="End" VerticalOptions="Center"/>
+            </Grid>
         </Border>
 
-        <ScrollView Grid.Column="{OnIdiom Phone='0', Desktop='1'}" 
-                    Grid.Row="{OnIdiom Phone='1', Desktop='0'}" 
-                    BackgroundColor="#F5F6FA">
-            <VerticalStackLayout Padding="{OnIdiom Phone='20', Desktop='40'}" Spacing="20">
+        <ScrollView Grid.Row="1" Padding="{OnIdiom Phone='15,10,15,30', Desktop='20,10,20,30'}">
 
-                <Label x:Name="KullaniciLabel"
-                       Text="Hoş Geldiniz"
-                       HorizontalOptions="Center"
-                       FontSize="16"
-                       TextColor="Gray"/>
+            <Grid RowSpacing="{OnIdiom Phone='12', Desktop='25'}" ColumnSpacing="{OnIdiom Phone='0', Desktop='25'}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="{OnIdiom Phone='0', Desktop='*'}"/>
+                </Grid.ColumnDefinitions>
 
-                <Label Text="KAMPÜS BAHÇE KAFE UYGULAMASI" 
-                       HorizontalOptions="Center" 
-                       FontSize="{OnIdiom Phone='20', Desktop='28'}" 
-                       FontAttributes="Bold" 
-                       TextColor="#2C3E50" 
-                       HorizontalTextAlignment="Center"/>
+                <Border x:Name="BtnMasalar" Grid.Row="0" Grid.Column="0" Style="{StaticResource GlassCardStyle}">
+                    <Border.Shadow>
+                        <Shadow Brush="#10B981" Offset="{OnIdiom Phone='0,4', Desktop='0,10'}" Radius="{OnIdiom Phone='10', Desktop='25'}" Opacity="0.2"/>
+                    </Border.Shadow>
+                    <StackLayout Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}" Spacing="{OnIdiom Phone='16', Desktop='15'}" VerticalOptions="Center" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}">
 
-                <FlexLayout x:Name="MasaContainer" 
-                            Wrap="Wrap" 
-                            JustifyContent="SpaceEvenly" 
-                            AlignItems="Center" 
-                            AlignContent="Start" />
+                        <Border BackgroundColor="{OnIdiom Phone='#ECFDF5', Desktop='Transparent'}" StrokeThickness="0" StrokeShape="RoundRectangle 16" WidthRequest="{OnIdiom Phone='60', Desktop='-1'}" HeightRequest="{OnIdiom Phone='60', Desktop='-1'}" VerticalOptions="Center">
+                            <Label Text="🍽️" FontSize="{OnIdiom Phone='32', Desktop='64'}" HorizontalOptions="Center" VerticalOptions="Center" Margin="{OnIdiom Phone='0', Desktop='0,15,0,15'}"/>
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                            <Label Text="Masalar" FontSize="{OnIdiom Phone='18', Desktop='24'}" FontAttributes="Bold" TextColor="#0F172A" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                            <Label Text="Siparişleri ve Masaları Yönet" FontSize="12" TextColor="#94A3B8" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                        </VerticalStackLayout>
+                    </StackLayout>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="Masalar_Clicked"/>
+                    </Border.GestureRecognizers>
+                </Border>
 
-            </VerticalStackLayout>
+                <Border x:Name="BtnMutfak" Grid.Row="{OnIdiom Phone='1', Desktop='0'}" Grid.Column="{OnIdiom Phone='0', Desktop='1'}" Style="{StaticResource GlassCardStyle}">
+                    <Border.Shadow>
+                        <Shadow Brush="#F59E0B" Offset="{OnIdiom Phone='0,4', Desktop='0,10'}" Radius="{OnIdiom Phone='10', Desktop='25'}" Opacity="0.2"/>
+                    </Border.Shadow>
+                    <StackLayout Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}" Spacing="{OnIdiom Phone='16', Desktop='15'}" VerticalOptions="Center" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}">
+
+                        <Border BackgroundColor="{OnIdiom Phone='#FFFBEB', Desktop='Transparent'}" StrokeThickness="0" StrokeShape="RoundRectangle 16" WidthRequest="{OnIdiom Phone='60', Desktop='-1'}" HeightRequest="{OnIdiom Phone='60', Desktop='-1'}" VerticalOptions="Center">
+                            <Label Text="👨‍🍳" FontSize="{OnIdiom Phone='32', Desktop='64'}" HorizontalOptions="Center" VerticalOptions="Center" Margin="{OnIdiom Phone='0', Desktop='0,15,0,15'}"/>
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                            <Label Text="Mutfak" FontSize="{OnIdiom Phone='18', Desktop='24'}" FontAttributes="Bold" TextColor="#0F172A" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                            <Label Text="Mutfak Sipariş Paneli" FontSize="12" TextColor="#94A3B8" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                        </VerticalStackLayout>
+                    </StackLayout>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="Mutfak_Clicked"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <Border x:Name="BtnRaporlar" Grid.Row="{OnIdiom Phone='2', Desktop='1'}" Grid.Column="0" Style="{StaticResource GlassCardStyle}">
+                    <Border.Shadow>
+                        <Shadow Brush="#3B82F6" Offset="{OnIdiom Phone='0,4', Desktop='0,10'}" Radius="{OnIdiom Phone='10', Desktop='25'}" Opacity="0.2"/>
+                    </Border.Shadow>
+                    <StackLayout Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}" Spacing="{OnIdiom Phone='16', Desktop='15'}" VerticalOptions="Center" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}">
+
+                        <Border BackgroundColor="{OnIdiom Phone='#EFF6FF', Desktop='Transparent'}" StrokeThickness="0" StrokeShape="RoundRectangle 16" WidthRequest="{OnIdiom Phone='60', Desktop='-1'}" HeightRequest="{OnIdiom Phone='60', Desktop='-1'}" VerticalOptions="Center">
+                            <Label Text="📊" FontSize="{OnIdiom Phone='32', Desktop='64'}" HorizontalOptions="Center" VerticalOptions="Center" Margin="{OnIdiom Phone='0', Desktop='0,15,0,15'}"/>
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                            <Label Text="Raporlar" FontSize="{OnIdiom Phone='18', Desktop='24'}" FontAttributes="Bold" TextColor="#0F172A" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                            <Label Text="Satış ve Analiz Paneli" FontSize="12" TextColor="#94A3B8" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                        </VerticalStackLayout>
+                    </StackLayout>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="Raporlar_Clicked"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <Border x:Name="BtnAyarlar" Grid.Row="{OnIdiom Phone='3', Desktop='1'}" Grid.Column="{OnIdiom Phone='0', Desktop='1'}" Style="{StaticResource GlassCardStyle}">
+                    <Border.Shadow>
+                        <Shadow Brush="#6366F1" Offset="{OnIdiom Phone='0,4', Desktop='0,10'}" Radius="{OnIdiom Phone='10', Desktop='25'}" Opacity="0.2"/>
+                    </Border.Shadow>
+                    <StackLayout Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}" Spacing="{OnIdiom Phone='16', Desktop='15'}" VerticalOptions="Center" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}">
+
+                        <Border BackgroundColor="{OnIdiom Phone='#EEF2FF', Desktop='Transparent'}" StrokeThickness="0" StrokeShape="RoundRectangle 16" WidthRequest="{OnIdiom Phone='60', Desktop='-1'}" HeightRequest="{OnIdiom Phone='60', Desktop='-1'}" VerticalOptions="Center">
+                            <Label Text="⚙️" FontSize="{OnIdiom Phone='32', Desktop='64'}" HorizontalOptions="Center" VerticalOptions="Center" Margin="{OnIdiom Phone='0', Desktop='0,15,0,15'}"/>
+                        </Border>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                            <Label Text="Ayarlar" FontSize="{OnIdiom Phone='18', Desktop='24'}" FontAttributes="Bold" TextColor="#0F172A" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                            <Label Text="Sistem Ayarları" FontSize="12" TextColor="#94A3B8" HorizontalOptions="{OnIdiom Phone='Start', Desktop='Center'}"/>
+                        </VerticalStackLayout>
+                    </StackLayout>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="Ayarlar_Clicked"/>
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+
         </ScrollView>
     </Grid>
 </ContentPage>

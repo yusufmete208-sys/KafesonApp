@@ -2,131 +2,243 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KafesonApp.AyarlarPage"
-             Title="Yönetim Paneli"
-             BackgroundColor="#F4F7F6">
+             Title=""
+             BackgroundColor="#F4F6FB"
+             NavigationPage.HasNavigationBar="False">
 
     <ContentPage.Resources>
-        <Style x:Key="MenuButtonStyle" TargetType="Button">
-            <Setter Property="BackgroundColor" Value="#5E35B1"/>
-            <Setter Property="TextColor" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="HeightRequest" Value="50"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="Margin" Value="{OnIdiom Phone='5,0', Desktop='0,5'}"/>
-            <Setter Property="HorizontalOptions" Value="{OnIdiom Phone='Start', Desktop='Fill'}"/>
-            <Setter Property="WidthRequest" Value="{OnIdiom Phone='140', Desktop='-1'}"/>
+        <Style x:Key="DashboardCard" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="White"/>
+            <Setter Property="StrokeShape" Value="RoundRectangle 24"/>
+            <Setter Property="StrokeThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Shadow">
+                <Setter.Value>
+                    <Shadow Brush="#CBD5E1" Offset="0,8" Radius="15" Opacity="0.15"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SidebarBtn" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="Transparent"/>
+            <Setter Property="TextColor" Value="#64748B"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontAttributes" Value="Bold"/>
+            <Setter Property="HeightRequest" Value="46"/>
+            <Setter Property="HorizontalOptions" Value="Fill"/>
+            <Setter Property="Padding" Value="16,0"/>
         </Style>
     </ContentPage.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="{OnIdiom Phone='Auto', Desktop='*'}" />
-            <RowDefinition Height="{OnIdiom Phone='*', Desktop='0'}" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{OnIdiom Phone='*', Desktop='250'}" />
-            <ColumnDefinition Width="{OnIdiom Phone='0', Desktop='*'}" />
+            <ColumnDefinition Width="{OnIdiom Phone='*', Desktop='260'}"/>
+            <ColumnDefinition Width="{OnIdiom Phone='0', Desktop='*'}"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Row="0" Grid.Column="0" 
-                BackgroundColor="#2C3E50" 
-                StrokeThickness="0">
-
-            <ScrollView Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}"
-                        VerticalScrollBarVisibility="Never" 
-                        HorizontalScrollBarVisibility="Never">
-
-                <StackLayout Orientation="{OnIdiom Phone='Horizontal', Desktop='Vertical'}" 
-                             Spacing="10" 
-                             Padding="15">
-
-                    <Label Text="{OnIdiom Phone='⚙️ AYARLAR', Desktop='YÖNETİM'}" 
-                           TextColor="White" 
-                           FontSize="{OnIdiom Phone='16', Desktop='20'}" 
-                           FontAttributes="Bold" 
-                           HorizontalOptions="Center" 
-                           VerticalOptions="Center"
-                           Margin="{OnIdiom Phone='0,0,10,0', Desktop='0,10,0,20'}"/>
-
-                    <Button Text="Ürün Listesi" 
-                            CommandParameter="MenuListesi" 
-                            Clicked="MenuSec_Clicked" 
-                            Style="{StaticResource MenuButtonStyle}"/>
-
-                    <Button Text="Yeni Ürün Ekle" 
-                            CommandParameter="YeniKayit" 
-                            Clicked="MenuSec_Clicked" 
-                            Style="{StaticResource MenuButtonStyle}"/>
-
-                    <Button Text="Fiyat Güncelle" 
-                            CommandParameter="FiyatGuncelle" 
-                            Clicked="MenuSec_Clicked" 
-                            Style="{StaticResource MenuButtonStyle}"/>
-
-                    <Button Text="Personel Kontrol" 
-                            CommandParameter="PersonelKontrol" 
-                            Clicked="MenuSec_Clicked" 
-                            Style="{StaticResource MenuButtonStyle}"/>
-
-                    <Button Text="Kapanan Masalar" 
-                            CommandParameter="KapananMasalar" 
-                            Clicked="MenuSec_Clicked" 
-                            Style="{StaticResource MenuButtonStyle}"/>
-
-                    <Button Text="Masa Düzeni" 
-                            CommandParameter="MasaDuzenle" 
-                            Clicked="MenuSec_Clicked" 
-                            Style="{StaticResource MenuButtonStyle}"/>
-
-                    <Button Text="Sistem Logları" 
-                            CommandParameter="SistemLoglari" 
-                            Clicked="MenuSec_Clicked" 
-                            BackgroundColor="#8E44AD"
-                            Style="{StaticResource MenuButtonStyle}"/>
-
-                    <BoxView Color="Gray" 
-                             WidthRequest="{OnIdiom Phone='1', Desktop='-1'}"
-                             HeightRequest="{OnIdiom Phone='40', Desktop='1'}"
-                             Margin="{OnIdiom Phone='10,0', Desktop='0,15'}"/>
-
-                    <Button Text="Ana Menüye Dön" 
-                            CommandParameter="Geri" 
-                            Clicked="MenuSec_Clicked" 
-                            BackgroundColor="#E74C3C" 
-                            TextColor="White" 
-                            HeightRequest="50" 
-                            CornerRadius="8"
-                            FontSize="14"
-                            WidthRequest="{OnIdiom Phone='150', Desktop='-1'}"
-                            Margin="{OnIdiom Phone='5,0', Desktop='0,0'}"/>
-
-                </StackLayout>
-            </ScrollView>
+        <Border Grid.Row="0" Grid.Column="0" BackgroundColor="#020e26" StrokeThickness="0" StrokeShape="RoundRectangle 0,0,30,30" Padding="15,20,15,30" IsVisible="{OnIdiom Phone='True', Desktop='False'}">
+            <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+                <Border Grid.Column="0" BackgroundColor="#162238" StrokeThickness="0" StrokeShape="RoundRectangle 12" WidthRequest="44" HeightRequest="44">
+                    <Button Text="❮" TextColor="White" FontAttributes="Bold" FontSize="16" BackgroundColor="Transparent" Clicked="MenuSec_Clicked" CommandParameter="Geri"/>
+                </Border>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                    <Label x:Name="MobilBaslikLabel" Text="YÖNETİM PANELİ" TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" CharacterSpacing="1"/>
+                    <Label x:Name="MobilAltBaslikLabel" Text="Sistem ve Personel Kontrol" TextColor="#94A3B8" FontSize="11" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+                <Label Grid.Column="2" Text="⚙️" FontSize="26" VerticalOptions="Center" Opacity="0.5"/>
+            </Grid>
         </Border>
 
-        <ContentView x:Name="ContentArea" 
-                     Grid.Row="{OnIdiom Phone='1', Desktop='0'}" 
-                     Grid.Column="{OnIdiom Phone='0', Desktop='1'}" 
-                     Padding="{OnIdiom Phone='10', Desktop='20'}"
-                     BackgroundColor="#F4F7F6">
+        <Border Grid.Row="{OnIdiom Phone='1', Desktop='0'}" Grid.RowSpan="{OnIdiom Phone='1', Desktop='2'}" Grid.Column="0" BackgroundColor="White" StrokeThickness="0">
+            <Border.Shadow>
+                <Shadow Brush="#CBD5E1" Offset="4,0" Radius="20" Opacity="0.15"/>
+            </Border.Shadow>
 
-            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                <Label Text="⚙️" FontSize="{OnIdiom Phone='40', Desktop='60'}" HorizontalOptions="Center"/>
-                <Label Text="Yönetim Paneli" 
-                       FontSize="{OnIdiom Phone='20', Desktop='24'}" 
-                       FontAttributes="Bold" 
-                       TextColor="#34495E"
-                       HorizontalOptions="Center"/>
-                <Label Text="İşlem yapmak için menüyü kullanın." 
-                       FontSize="{OnIdiom Phone='14', Desktop='16'}" 
-                       TextColor="Gray"
-                       HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center"/>
-            </VerticalStackLayout>
+            <Grid RowDefinitions="Auto, *">
 
+                <Grid Grid.Row="0" Padding="20,52,20,24" ColumnDefinitions="Auto, *" ColumnSpacing="12" IsVisible="{OnIdiom Phone='False', Desktop='True'}">
+                    <Border BackgroundColor="#E67E22" StrokeShape="RoundRectangle 12" StrokeThickness="0" WidthRequest="42" HeightRequest="42" VerticalOptions="Center">
+                        <Border.Shadow>
+                            <Shadow Brush="#E67E22" Offset="0,3" Radius="10" Opacity="0.3"/>
+                        </Border.Shadow>
+                        <Label Text="☕" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                        <Label Text="KAFESON" FontSize="15" FontAttributes="Bold" TextColor="#0F172A" CharacterSpacing="2"/>
+                        <Label Text="Yönetim Paneli" FontSize="11" TextColor="#94A3B8"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
+                    <Grid>
+                        <VerticalStackLayout x:Name="MobilKartlarAlani" IsVisible="{OnIdiom Phone='True', Desktop='False'}" Padding="15,10,15,20" Spacing="15">
+
+                            <Label Text="📦 İÇERİK YÖNETİMİ" FontSize="11" FontAttributes="Bold" TextColor="#94A3B8" CharacterSpacing="1" Margin="4,0,0,0"/>
+                            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" ColumnSpacing="10" RowSpacing="10">
+
+                                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource DashboardCard}">
+                                    <Grid>
+                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Padding="10,25">
+                                            <Label Text="📋" FontSize="42" HorizontalOptions="Center"/>
+                                            <Label Text="Menü Listesi" FontSize="13" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center"/>
+                                            <Label Text="Ürünleri Görüntüle" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
+                                        </VerticalStackLayout>
+                                        <Button CommandParameter="MenuListesi" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource DashboardCard}">
+                                    <Grid>
+                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Padding="10,25">
+                                            <Label Text="🍔" FontSize="42" HorizontalOptions="Center"/>
+                                            <Label Text="Yeni Ürün Ekle" FontSize="13" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center"/>
+                                            <Label Text="Kataloğa Ekle" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
+                                        </VerticalStackLayout>
+                                        <Button CommandParameter="YeniKayit" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource DashboardCard}">
+                                    <Grid>
+                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Padding="10,25">
+                                            <Label Text="📈" FontSize="42" HorizontalOptions="Center"/>
+                                            <Label Text="Fiyat Revize" FontSize="13" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center"/>
+                                            <Label Text="Menü Fiyatları" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
+                                        </VerticalStackLayout>
+                                        <Button CommandParameter="FiyatGuncelle" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource DashboardCard}">
+                                    <Grid>
+                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Padding="10,25">
+                                            <Label Text="🪑" FontSize="42" HorizontalOptions="Center"/>
+                                            <Label Text="Masa Düzeni" FontSize="13" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center"/>
+                                            <Label Text="Ekle / Çıkar" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
+                                        </VerticalStackLayout>
+                                        <Button CommandParameter="MasaDuzenle" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <Label Text="🛡️ PERSONEL &amp; YÖNETİM" FontSize="11" FontAttributes="Bold" TextColor="#94A3B8" CharacterSpacing="1" Margin="4,10,0,0"/>
+                            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" ColumnSpacing="10" RowSpacing="10">
+                                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource DashboardCard}">
+                                    <Grid>
+                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Padding="10,25">
+                                            <Label Text="👥" FontSize="42" HorizontalOptions="Center"/>
+                                            <Label Text="Personel Kontrol" FontSize="13" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center"/>
+                                            <Label Text="Yetki ve Kullanıcılar" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
+                                        </VerticalStackLayout>
+                                        <Button CommandParameter="PersonelKontrol" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource DashboardCard}">
+                                    <Grid>
+                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" Padding="10,25">
+                                            <Label Text="🕰️" FontSize="42" HorizontalOptions="Center"/>
+                                            <Label Text="Geçmiş Kayıtlar" FontSize="13" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="Center"/>
+                                            <Label Text="Kapanan Masalar" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
+                                        </VerticalStackLayout>
+                                        <Button CommandParameter="KapananMasalar" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <Label Text="⚙️ SİSTEM AYARLARI" FontSize="11" FontAttributes="Bold" TextColor="#94A3B8" CharacterSpacing="1" Margin="4,10,0,0"/>
+                            <VerticalStackLayout Spacing="10">
+
+                                <Border BackgroundColor="#8B5CF6" StrokeThickness="0" StrokeShape="RoundRectangle 24" Padding="0" HeightRequest="90">
+                                    <Grid>
+                                        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20" Padding="20">
+                                            <Label Text="🛡️" FontSize="40" VerticalOptions="Center"/>
+                                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                                <Label Text="SİSTEM LOGLARI" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                                                <Label Text="Güvenlik Kayıtları" FontSize="11" TextColor="#E1CAFF"/>
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
+                                        <Button CommandParameter="SistemLoglari" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border BackgroundColor="#F97316" StrokeThickness="0" StrokeShape="RoundRectangle 24" Padding="0" HeightRequest="90">
+                                    <Grid>
+                                        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20" Padding="20">
+                                            <Label Text="📡" FontSize="40" VerticalOptions="Center"/>
+                                            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                                <Label Text="BAĞLANTI VE QR" FontSize="16" FontAttributes="Bold" TextColor="White"/>
+                                                <Label Text="Kasa Eşleşme" FontSize="11" TextColor="#FFEDD5"/>
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
+                                        <Button CommandParameter="BaglantiAyar" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill" ZIndex="1"/>
+                                    </Grid>
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <BoxView Color="#E2E8F0" HeightRequest="1" Margin="0,10"/>
+                            <Border BackgroundColor="#FEF2F2" StrokeShape="RoundRectangle 12" Stroke="#FECACA" StrokeThickness="1">
+                                <Button Text="← Ana Menüye Dön" CommandParameter="Geri" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" TextColor="#DC2626" FontSize="14" FontAttributes="Bold" HeightRequest="50"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout IsVisible="{OnIdiom Phone='False', Desktop='True'}" Padding="12,0,12,20" Spacing="2">
+                            <Label Text="İÇERİK" FontSize="9" FontAttributes="Bold" TextColor="#CBD5E1" CharacterSpacing="3" Margin="8,10,0,6"/>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="🍽  Ürün Listesi" CommandParameter="MenuListesi" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}"/>
+                            </Border>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="➕  Yeni Ürün Ekle" CommandParameter="YeniKayit" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}"/>
+                            </Border>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="💰  Fiyat Güncelle" CommandParameter="FiyatGuncelle" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}"/>
+                            </Border>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="🪑  Masa Düzeni" CommandParameter="MasaDuzenle" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}"/>
+                            </Border>
+                            <Label Text="YÖNETİM" FontSize="9" FontAttributes="Bold" TextColor="#CBD5E1" CharacterSpacing="3" Margin="8,14,0,6"/>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="👥  Personel Kontrol" CommandParameter="PersonelKontrol" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}"/>
+                            </Border>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="📋  Kapanan Masalar" CommandParameter="KapananMasalar" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}"/>
+                            </Border>
+                            <Label Text="SİSTEM" FontSize="9" FontAttributes="Bold" TextColor="#CBD5E1" CharacterSpacing="3" Margin="8,14,0,6"/>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="📜  Sistem Logları" CommandParameter="SistemLoglari" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}" TextColor="#7C3AED"/>
+                            </Border>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10">
+                                <Button Text="📡  Bağlantı ve QR" CommandParameter="BaglantiAyar" Clicked="MenuSec_Clicked" Style="{StaticResource SidebarBtn}" TextColor="#EA580C"/>
+                            </Border>
+
+                            <BoxView Color="#E2E8F0" HeightRequest="1" Margin="4,12"/>
+                            <Border BackgroundColor="#FEF2F2" StrokeShape="RoundRectangle 10" Stroke="#FECACA" StrokeThickness="1" Margin="0,4,0,0">
+                                <Button Text="← Ana Menüye Dön" CommandParameter="Geri" Clicked="MenuSec_Clicked" BackgroundColor="Transparent" TextColor="#DC2626" FontSize="13" FontAttributes="Bold" HeightRequest="46"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+                </ScrollView>
+            </Grid>
+        </Border>
+
+        <ContentView x:Name="ContentArea" Grid.Row="{OnIdiom Phone='1', Desktop='0'}" Grid.RowSpan="{OnIdiom Phone='1', Desktop='2'}" Grid.Column="{OnIdiom Phone='0', Desktop='1'}" BackgroundColor="#F4F6FB">
+            <Grid x:Name="VarsayilanIcerik">
+                <Ellipse Fill="#E67E22" Opacity="0.04" WidthRequest="400" HeightRequest="400" HorizontalOptions="Center" VerticalOptions="Center"/>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="16">
+                    <Border BackgroundColor="White" StrokeShape="RoundRectangle 28" StrokeThickness="0" WidthRequest="90" HeightRequest="90" HorizontalOptions="Center">
+                        <Border.Shadow>
+                            <Shadow Brush="#E67E22" Offset="0,4" Radius="20" Opacity="0.12"/>
+                        </Border.Shadow>
+                        <Label Text="⚙️" FontSize="42" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <Label Text="YÖNETİM PANELİ" FontSize="11" FontAttributes="Bold" TextColor="#E67E22" CharacterSpacing="4" HorizontalOptions="Center"/>
+                    <Label Text="Bir işlem seçin" FontSize="{OnIdiom Phone='18', Desktop='22'}" FontAttributes="Bold" TextColor="#0F172A" HorizontalOptions="Center"/>
+                    <Label Text="Menüden bir modül açarak işlemlere başlayabilirsiniz." FontSize="13" TextColor="#94A3B8" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </Grid>
         </ContentView>
-
     </Grid>
 </ContentPage>

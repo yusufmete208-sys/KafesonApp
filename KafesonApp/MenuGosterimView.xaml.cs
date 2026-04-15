@@ -1,33 +1,32 @@
-using KafesonApp.Models;
+﻿using Kafeson.Shared.Models; // DÜZELTİLDİ: Artık Shared modellerini kullanıyor
+using KafesonApp.Data;
 
 namespace KafesonApp;
 
-public class GosterimGrup : List<Urun>
-{
-    public string Baslik { get; set; }
-    public GosterimGrup(string baslik, List<Urun> urunler) : base(urunler)
-    {
-        Baslik = baslik;
-    }
-}
-
 public partial class MenuGosterimView : ContentView
 {
+    private readonly VeriServisi _servis = new VeriServisi();
+
     public MenuGosterimView()
     {
-        InitializeComponent(); // Hata buradaysa yukar�daki x:Class ismini kontrol edin
-        VerileriYukle();
+        InitializeComponent();
+        UrunListesi.ItemsSource = App.Urunler;
     }
 
-    private void VerileriYukle()
+    private async void OnUrunSilClicked(object sender, EventArgs e)
     {
-        if (App.Urunler == null || App.Urunler.Count == 0) return;
-
-        var gruplar = App.Urunler
-            .GroupBy(u => u.Kategori)
-            .Select(g => new GosterimGrup(string.IsNullOrWhiteSpace(g.Key) ? "Genel" : g.Key, g.ToList()))
-            .ToList();
-
-        MenuCollectionView.ItemsSource = gruplar;
+        if (sender is Button btn && btn.CommandParameter is Urun urun)
+        {
+            bool onay = await App.Current.Windows[0].Page.DisplayAlert("Onay", $"{urun.Ad} silinsin mi?", "Evet", "Hayır");
+            if (onay)
+            {
+                if (await _servis.UrunSil(urun.Id))
+                {
+                    App.Urunler.Remove(urun);
+                    // LogEkle metoduna 3 parametre gönderiyoruz: İşlem, Detay, MasaNo (Yönetim olduğu için 0)
+                    await App.LogEkle("Ürün Silindi", urun.Ad, 0);
+                }
+            }
+        }
     }
 }

@@ -2,38 +2,23 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KafesonApp.KayitPage"
-             Title="Yeni Personel Kaydı"
-             BackgroundColor="#F4F7F6">
+             Title="Kayıt Ol"
+             BackgroundColor="#ECF0F1">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+    <VerticalStackLayout VerticalOptions="Center" Padding="30" Spacing="20">
+        <Label Text="KAFESON" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="#2C3E50"/>
+        <Label Text="Yönetici Kaydı" FontSize="16" HorizontalOptions="Center" TextColor="Gray"/>
 
-            <Label Text="YENİ HESAP OLUŞTUR" FontSize="24" FontAttributes="Bold" TextColor="#2C3E50" HorizontalOptions="Center"/>
+        <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0">
+            <Entry x:Name="KullaniciAdiEntry" Placeholder="Kullanıcı Adı" TextColor="#2C3E50" HeightRequest="50"/>
+        </Border>
 
-            <Entry x:Name="KadiEntry" Placeholder="Kullanıcı Adı" BackgroundColor="White"/>
-            <Entry x:Name="SifreEntry" Placeholder="Şifre" IsPassword="True" BackgroundColor="White"/>
+        <Border BackgroundColor="White" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0">
+            <Entry x:Name="SifreEntry" Placeholder="Şifre" IsPassword="True" TextColor="#2C3E50" HeightRequest="50"/>
+        </Border>
 
-            <Label Text="Yetkiler (Erişebileceği Sayfalar)" FontAttributes="Bold" Margin="0,10,0,0"/>
-
-            <HorizontalStackLayout Spacing="10">
-                <CheckBox x:Name="CheckMasalar" Color="#27AE60"/>
-                <Label Text="Masalar / Sipariş Ekranı" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
-
-            <HorizontalStackLayout Spacing="10">
-                <CheckBox x:Name="CheckRaporlar" Color="#27AE60"/>
-                <Label Text="Raporları Görüntüle" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
-
-            <HorizontalStackLayout Spacing="10">
-                <CheckBox x:Name="CheckAyarlar" Color="#27AE60"/>
-                <Label Text="Ayarlar / Yönetim Paneli" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
-
-            <Button Text="KAYDET" Clicked="Kaydet_Clicked" BackgroundColor="#27AE60" TextColor="White" HeightRequest="50" CornerRadius="10" Margin="0,20,0,0"/>
-
-            <Button Text="Vazgeç" Clicked="Vazgec_Clicked" BackgroundColor="Transparent" TextColor="#7F8C8D"/>
-
-        </VerticalStackLayout>
-    </ScrollView>
-</ContentPage>
+        <Button Text="KAYIT OL" Clicked="KayitOl_Clicked" 
+                BackgroundColor="#2980B9" TextColor="White" FontAttributes="Bold" 
+                CornerRadius="10" HeightRequest="50"/>
+    </VerticalStackLayout>
+</ContentPage>  

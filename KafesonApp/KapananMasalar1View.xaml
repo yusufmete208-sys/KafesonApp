@@ -1,70 +1,72 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:KafesonApp"
+             xmlns:models="clr-namespace:Kafeson.Shared.Models;assembly=Kafeson.Shared"
              x:Class="KafesonApp.KapananMasalar1View"
-             Title="Satış Geçmişi"
-             BackgroundColor="#F4F7F6">
+             BackgroundColor="#F0F2F8">
 
-    <Grid RowDefinitions="Auto, Auto, *">
-        <Frame Grid.Row="0" BackgroundColor="#2C3E50" Margin="0" HasShadow="False" CornerRadius="0" Padding="10">
-            <Grid ColumnDefinitions="Auto, *">
-                <Button Text="← Geri" 
-                        Clicked="GeriDon_Clicked" 
-                        BackgroundColor="Transparent" 
-                        TextColor="White" 
-                        FontAttributes="Bold"
-                        FontSize="16"/>
-                <Label Grid.Column="1" 
-                       Text="SATIŞ GEÇMİŞİ" 
-                       TextColor="White" 
-                       FontSize="18" 
-                       FontAttributes="Bold" 
-                       VerticalOptions="Center" 
-                       HorizontalOptions="Center"
-                       Margin="0,0,60,0"/>
+    <Grid RowDefinitions="Auto, *">
+        <Grid Grid.Row="0" BackgroundColor="White" RowDefinitions="Auto, Auto" Padding="20,52,20,20">
+            <Grid.Shadow>
+                <Shadow Brush="#CBD5E1" Offset="0,4" Radius="16" Opacity="0.18"/>
+            </Grid.Shadow>
+
+            <VerticalStackLayout Grid.Row="0" Spacing="3" Margin="0,0,0,14">
+                <Label Text="İŞLEM GEÇMİŞİ" FontSize="10" FontAttributes="Bold" TextColor="#6366F1" CharacterSpacing="4"/>
+                <Label Text="Kapanan Masalar" FontSize="26" FontAttributes="Bold" TextColor="#111827"/>
+            </VerticalStackLayout>
+
+            <Grid Grid.Row="1" ColumnDefinitions="*, Auto, *" ColumnSpacing="0">
+                <Border Grid.Column="0" BackgroundColor="#EEF2FF" StrokeShape="RoundRectangle 12" StrokeThickness="0" Padding="14,10" Margin="0,0,6,0">
+                    <VerticalStackLayout HorizontalOptions="Center">
+                        <Label Text="BUGÜN" FontSize="9" FontAttributes="Bold" TextColor="#818CF8" HorizontalOptions="Center"/>
+                        <Label x:Name="IslemSayisiLabel" Text="0 İşlem" FontSize="18" FontAttributes="Bold" TextColor="#4F46E5" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+                <BoxView Grid.Column="1" Color="#E5E7EB" WidthRequest="1" HeightRequest="36" VerticalOptions="Center" Margin="6,0"/>
+                <Border Grid.Column="2" BackgroundColor="#F0FDF4" StrokeShape="RoundRectangle 12" StrokeThickness="0" Padding="14,10" Margin="6,0,0,0">
+                    <VerticalStackLayout HorizontalOptions="Center">
+                        <Label Text="TOPLAM" FontSize="9" FontAttributes="Bold" TextColor="#4ADE80" HorizontalOptions="Center"/>
+                        <Label x:Name="ToplamTutarLabel" Text="0,00 ₺" FontSize="18" FontAttributes="Bold" TextColor="#16A34A" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
             </Grid>
-        </Frame>
+        </Grid>
 
-        <Frame Grid.Row="1" Margin="10,10,10,5" Padding="10" CornerRadius="10" BorderColor="#D5D8DC">
-            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                <Label Text="Tarih Filtrele:" VerticalOptions="Center" TextColor="#7F8C8D" FontAttributes="Bold"/>
-                <DatePicker x:Name="TarihSecici" 
-                            DateSelected="TarihDegisti" 
-                            Format="dd/MM/yyyy" 
-                            TextColor="#2C3E50"/>
-                <Button Text="Tümünü Gör" 
-                        Clicked="TumunuGoster_Clicked" 
-                        FontSize="12" 
-                        BackgroundColor="#ECF0F1" 
-                        TextColor="#2C3E50" 
-                        Padding="10,0"/>
-            </HorizontalStackLayout>
-        </Frame>
+        <CollectionView Grid.Row="1" x:Name="GecmisListesi" Margin="14,14,14,24">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="{OnIdiom Phone=1, Desktop=3}" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+            </CollectionView.ItemsLayout>
 
-        <CollectionView Grid.Row="2" x:Name="KapananMasalarListesi" Margin="10">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Margin="5,5" Padding="15" CornerRadius="12" HasShadow="True" BackgroundColor="White">
+                <DataTemplate x:DataType="models:SatisRaporu">
+                    <Border BackgroundColor="White" StrokeShape="RoundRectangle 18" StrokeThickness="0" Padding="0" Margin="0,0,0,12">
+                        <Border.Shadow>
+                            <Shadow Brush="#CBD5E1" Offset="0,4" Radius="16" Opacity="0.12"/>
+                        </Border.Shadow>
 
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnMasaTapped" CommandParameter="{Binding .}" />
-                        </Frame.GestureRecognizers>
+                        <Grid RowDefinitions="Auto, Auto, *, Auto" HeightRequest="215">
+                            <Grid Grid.Row="0" BackgroundColor="#F8FAFC" Padding="14,11" ColumnDefinitions="*, Auto">
+                                <Label Text="{Binding MasaNo, StringFormat='MASA {0}'}" FontAttributes="Bold" TextColor="#4F46E5" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding Tarih, StringFormat='{0:HH:mm}'}" FontSize="11" TextColor="#94A3B8" VerticalOptions="Center"/>
+                            </Grid>
 
-                        <VerticalStackLayout Spacing="8" HorizontalOptions="Start" InputTransparent="True">
-                            <HorizontalStackLayout Spacing="10">
-                                <Label Text="{Binding MasaNo, StringFormat='MASA {0}'}" FontSize="18" FontAttributes="Bold" TextColor="#2C3E50"/>
-                                <Label Text="{Binding SiraNo, StringFormat='(Bugün #{0})'}" FontSize="14" TextColor="#7F8C8D" VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="{Binding Tutar, StringFormat='{0:N2} ₺'}" FontSize="24" FontAttributes="Bold" TextColor="#16A34A" HorizontalOptions="Center" Margin="0,15,0,5"/>
+                            <Label Grid.Row="2" Text="{Binding UrunDetaylari}" FontSize="12" TextColor="#64748B" HorizontalTextAlignment="Center" MaxLines="2" LineBreakMode="TailTruncation" Margin="15,0,15,10" VerticalOptions="Start"/>
 
-                            <Label Text="{Binding ToplamTutar, StringFormat='{0:N2} TL'}" FontSize="22" FontAttributes="Bold" TextColor="#27AE60"/>
-
-                            <HorizontalStackLayout Spacing="15">
-                                <Label Text="{Binding AcilisZamani, StringFormat='Açılış: {0:HH:mm}'}" TextColor="#2980B9" FontAttributes="Bold"/>
-                                <Label Text="{Binding KapanisZamani, StringFormat='Kapanış: {0:HH:mm}'}" TextColor="#C0392B" FontAttributes="Bold"/>
-                            </HorizontalStackLayout>
-                        </VerticalStackLayout>
-                    </Frame>
+                            <Grid Grid.Row="3" ColumnDefinitions="*, *" ColumnSpacing="8" Padding="12,0,12,15" VerticalOptions="End">
+                                <Border Grid.Column="0" BackgroundColor="#FFFBEB" Padding="6,6" StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                                    <Label Text="{Binding OdemeTuru}" FontSize="10" TextColor="#D97706" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
+                                <Border Grid.Column="1" BackgroundColor="#EFF6FF" Padding="6,6" StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                                    <HorizontalStackLayout Spacing="4" HorizontalOptions="Center" VerticalOptions="Center">
+                                        <Label Text="👤" FontSize="10" VerticalOptions="Center"/>
+                                        <Label Text="{Binding PersonelAdi}" FontSize="10" TextColor="#2563EB" FontAttributes="Bold" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

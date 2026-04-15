@@ -1,25 +1,170 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Kafeson.Shared.Models;assembly=Kafeson.Shared"
              x:Class="KafesonApp.LoglarPage"
-             Title="Sistem Kayıtları (Loglar)"
-             BackgroundColor="#F5F6FA">
+             Title="Sistem Kayıtları"
+             BackgroundColor="#F8FAFC">
+    <Grid RowDefinitions="Auto, *">
 
-    <CollectionView ItemsSource="{Binding .}">
-        <CollectionView.ItemTemplate>
-            <DataTemplate>
-                <Frame Margin="10,5" Padding="15" CornerRadius="12" BorderColor="#DCDDE1" HasShadow="True">
-                    <VerticalStackLayout Spacing="5">
-                        <HorizontalStackLayout Spacing="10">
-                            <Label Text="{Binding Tarih, StringFormat='{0:HH:mm}'}" 
-                                   FontSize="13" TextColor="Gray" FontAttributes="Bold" />
-                            <Label Text="{Binding IslemTipi}" 
-                                   FontSize="13" TextColor="#2980B9" FontAttributes="Bold" />
-                        </HorizontalStackLayout>
-                        <Label Text="{Binding Mesaj}" FontSize="15" TextColor="#2C3E50" LineBreakMode="WordWrap"/>
-                    </VerticalStackLayout>
-                </Frame>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+        <!-- Header Section - Gradient Effect with Shadow -->
+        <Border Grid.Row="0" 
+                BackgroundColor="#1E293B" 
+                Padding="20,25" 
+                StrokeThickness="0"
+                Shadow="{Shadow Brush='#000000', Offset='0,4', Radius='12', Opacity='0.15'}">
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                <Border BackgroundColor="#334155" 
+                        StrokeShape="RoundRectangle 12" 
+                        Padding="12,8" 
+                        StrokeThickness="0"
+                        HorizontalOptions="Center">
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="📜" FontSize="22" VerticalOptions="Center"/>
+                        <Label Text="SİSTEM LOGLARI" 
+                               TextColor="White" 
+                               FontAttributes="Bold" 
+                               FontSize="20" 
+                               VerticalOptions="Center"
+                               CharacterSpacing="1"/>
+                    </HorizontalStackLayout>
+                </Border>
+                <Label Text="Tüm sistem aktivitelerini buradan takip edin" 
+                       TextColor="#94A3B8" 
+                       FontSize="13" 
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Border>
+        <!-- Log List Section -->
+        <CollectionView Grid.Row="1" 
+                        x:Name="LogListesi" 
+                        Margin="{OnIdiom Phone='12', Tablet='24', Desktop='40'}"
+                        ItemsLayout="{OnIdiom 
+                            Phone='VerticalList', 
+                            Tablet='VerticalGrid, 2', 
+                            Desktop='VerticalGrid, 3'}">
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                    <Border BackgroundColor="#E2E8F0" 
+                            StrokeShape="RoundRectangle 50" 
+                            WidthRequest="100" 
+                            HeightRequest="100" 
+                            StrokeThickness="0"
+                            HorizontalOptions="Center">
+                        <Label Text="📋" FontSize="40" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <Label Text="Henüz kayıt bulunmuyor" 
+                           TextColor="#64748B" 
+                           FontSize="16" 
+                           FontAttributes="Bold"/>
+                    <Label Text="Sistem logları burada görünecek" 
+                           TextColor="#94A3B8" 
+                           FontSize="13"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:SistemLog">
+                    <Border BackgroundColor="White" 
+                            StrokeShape="RoundRectangle 16" 
+                            Padding="{OnIdiom Phone='16', Tablet='20', Desktop='24'}" 
+                            Margin="{OnIdiom Phone='0,0,0,10', Tablet='6', Desktop='8'}" 
+                            Stroke="#E2E8F0"
+                            StrokeThickness="1"
+                            Shadow="{Shadow Brush='#000000', Offset='0,2', Radius='8', Opacity='0.06'}">
+                        <VerticalStackLayout Spacing="12">
+
+                            <!-- Top Row: Title & Date -->
+                            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto">
+                                <HorizontalStackLayout Spacing="10">
+                                    <Border BackgroundColor="#DBEAFE" 
+                                            StrokeShape="RoundRectangle 8" 
+                                            Padding="8,5" 
+                                            StrokeThickness="0"
+                                            VerticalOptions="Center">
+                                        <Label Text="📌" FontSize="12"/>
+                                    </Border>
+                                    <Label Text="{Binding IslemTuru}" 
+                                           FontAttributes="Bold" 
+                                           FontSize="{OnIdiom Phone='15', Tablet='16', Desktop='17'}"
+                                           TextColor="#1E293B"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation"/>
+                                </HorizontalStackLayout>
+
+                                <Border Grid.Column="1" 
+                                        BackgroundColor="#F1F5F9" 
+                                        StrokeShape="RoundRectangle 8" 
+                                        Padding="10,6" 
+                                        StrokeThickness="0">
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Label Text="🕐" FontSize="11" VerticalOptions="Center"/>
+                                        <Label Text="{Binding Tarih, StringFormat='{0:dd.MM.yyyy HH:mm}'}" 
+                                               TextColor="#64748B" 
+                                               FontSize="12" 
+                                               FontAttributes="Bold"
+                                               VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </Grid>
+
+                            <!-- Separator Line -->
+                            <BoxView HeightRequest="1" 
+                                     BackgroundColor="#F1F5F9" 
+                                     HorizontalOptions="Fill"/>
+
+                            <!-- Detail Text -->
+                            <Label Text="{Binding Detay}" 
+                                   TextColor="#475569"
+                                   FontSize="{OnIdiom Phone='14', Tablet='15', Desktop='15'}"
+                                   LineHeight="1.4"
+                                   MaxLines="3"
+                                   LineBreakMode="TailTruncation"/>
+
+                            <!-- Bottom Row: Masa & Personel Info -->
+                            <FlexLayout Direction="Row" 
+                                        Wrap="Wrap" 
+                                        JustifyContent="Start" 
+                                        AlignItems="Center">
+
+                                <!-- Masa Badge -->
+                                <Border BackgroundColor="#ECFDF5" 
+                                        StrokeShape="RoundRectangle 20" 
+                                        Padding="12,6" 
+                                        StrokeThickness="0"
+                                        Margin="0,0,8,4">
+                                    <HorizontalStackLayout Spacing="6">
+                                        <Label Text="🪑" FontSize="12" VerticalOptions="Center"/>
+                                        <Label Text="{Binding MasaNo, StringFormat='Masa {0}'}" 
+                                               FontSize="12" 
+                                               TextColor="#059669" 
+                                               FontAttributes="Bold"
+                                               VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <!-- Personel Badge -->
+                                <Border BackgroundColor="#EFF6FF" 
+                                        StrokeShape="RoundRectangle 20" 
+                                        Padding="12,6" 
+                                        StrokeThickness="0"
+                                        Margin="0,0,8,4">
+                                    <HorizontalStackLayout Spacing="6">
+                                        <Label Text="👤" FontSize="12" VerticalOptions="Center"/>
+                                        <Label Text="{Binding PersonelAdi}" 
+                                               FontSize="12" 
+                                               TextColor="#2563EB"
+                                               FontAttributes="Bold"
+                                               VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </FlexLayout>
+
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </ContentPage>

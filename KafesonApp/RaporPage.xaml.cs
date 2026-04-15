@@ -1,14 +1,26 @@
-﻿using KafesonApp.Models;
+﻿#nullable disable
+using Kafeson.Shared.Models;
+using KafesonApp.Data;
 using System.Linq;
 using System.IO;
+using System;
+using System.Collections.Generic;
+using Microsoft.Maui.ApplicationModel.DataTransfer;
+using Microsoft.Maui.Devices;
+
+#if WINDOWS
 using QuestPDF.Fluent;
-using Microsoft.Maui.ApplicationModel;
+using QuestPDF.Infrastructure;
+#endif
 
 namespace KafesonApp;
 
 public partial class RaporPage : ContentPage
 {
     string seciliMod = "Gun";
+    private readonly VeriServisi _servis = new VeriServisi();
+    private List<SatisRaporu> _tumRaporlar = new List<SatisRaporu>();
+    private List<SatisRaporu> _filtreliRaporlar = new List<SatisRaporu>();
 
     public RaporPage()
     {
@@ -16,10 +28,19 @@ public partial class RaporPage : ContentPage
         RaporTarihSecici.Date = DateTime.Now;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        RaporuHesapla();
+
+        try
+        {
+            _tumRaporlar = await _servis.RaporlariGetir();
+            RaporuHesapla();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Bağlantı Hatası", "Rapor verileri çekilemedi: " + ex.Message, "Tamam");
+        }
     }
 
     private void ModDegistir(object sender, EventArgs e)
@@ -27,180 +48,224 @@ public partial class RaporPage : ContentPage
         var btn = (Button)sender;
         seciliMod = btn.CommandParameter.ToString();
 
-        BtnGun.BackgroundColor = seciliMod == "Gun" ? Color.FromArgb("#34495E") : Colors.Transparent;
-        BtnGun.TextColor = seciliMod == "Gun" ? Colors.White : Color.FromArgb("#34495E");
+        BtnGun.BackgroundColor = seciliMod == "Gun" ? Microsoft.Maui.Graphics.Color.FromArgb("#34495E") : Microsoft.Maui.Graphics.Colors.Transparent;
+        BtnGun.TextColor = seciliMod == "Gun" ? Microsoft.Maui.Graphics.Colors.White : Microsoft.Maui.Graphics.Color.FromArgb("#34495E");
 
-        BtnAy.BackgroundColor = seciliMod == "Ay" ? Color.FromArgb("#34495E") : Colors.Transparent;
-        BtnAy.TextColor = seciliMod == "Ay" ? Colors.White : Color.FromArgb("#34495E");
+        BtnAy.BackgroundColor = seciliMod == "Ay" ? Microsoft.Maui.Graphics.Color.FromArgb("#34495E") : Microsoft.Maui.Graphics.Colors.Transparent;
+        BtnAy.TextColor = seciliMod == "Ay" ? Microsoft.Maui.Graphics.Colors.White : Microsoft.Maui.Graphics.Color.FromArgb("#34495E");
 
-        BtnYil.BackgroundColor = seciliMod == "Yil" ? Color.FromArgb("#34495E") : Colors.Transparent;
-        BtnYil.TextColor = seciliMod == "Yil" ? Colors.White : Color.FromArgb("#34495E");
+        BtnYil.BackgroundColor = seciliMod == "Yil" ? Microsoft.Maui.Graphics.Color.FromArgb("#34495E") : Microsoft.Maui.Graphics.Colors.Transparent;
+        BtnYil.TextColor = seciliMod == "Yil" ? Microsoft.Maui.Graphics.Colors.White : Microsoft.Maui.Graphics.Color.FromArgb("#34495E");
 
         RaporuHesapla();
     }
 
     private void RaporuHesapla()
     {
-        if (App.SatisRaporlari == null) return;
+        if (_tumRaporlar == null) return;
 
         DateTime tarih = RaporTarihSecici.Date;
-        List<SatisRaporu> filtreliRaporlar;
 
         if (seciliMod == "Gun")
-        {
-            filtreliRaporlar = App.SatisRaporlari.Where(x => x.Tarih.Date == tarih.Date).ToList();
-            RaporBaslikLabel.Text = $"{tarih:dd MMMM yyyy} TOPLAM KAZANÇ";
-        }
+            _filtreliRaporlar = _tumRaporlar.Where(x => x.Tarih.Date == tarih.Date).ToList();
         else if (seciliMod == "Ay")
-        {
-            filtreliRaporlar = App.SatisRaporlari.Where(x => x.Tarih.Month == tarih.Month && x.Tarih.Year == tarih.Year).ToList();
-            RaporBaslikLabel.Text = $"{tarih:MMMM yyyy} TOPLAM KAZANÇ";
-        }
+            _filtreliRaporlar = _tumRaporlar.Where(x => x.Tarih.Month == tarih.Month && x.Tarih.Year == tarih.Year).ToList();
         else
-        {
-            filtreliRaporlar = App.SatisRaporlari.Where(x => x.Tarih.Year == tarih.Year).ToList();
-            RaporBaslikLabel.Text = $"{tarih.Year} YILI TOPLAM KAZANÇ";
-        }
+            _filtreliRaporlar = _tumRaporlar.Where(x => x.Tarih.Year == tarih.Year).ToList();
 
-        double toplamCiro = filtreliRaporlar.Sum(x => x.Tutar);
-        int islemSayisi = filtreliRaporlar.Count;
+        CiroLabel.Text = $"{_filtreliRaporlar.Sum(x => x.Tutar):N2} ₺";
+        AdetLabel.Text = $"{_filtreliRaporlar.Count} İşlem Gerçekleşti";
 
-        CiroLabel.Text = $"{toplamCiro:N2} ₺";
-        AdetLabel.Text = $"{islemSayisi} Masa Hesabı Kapatıldı";
+        double ortalama = _filtreliRaporlar.Count > 0 ? _filtreliRaporlar.Average(x => x.Tutar) : 0;
+        OrtalamaLabel.Text = $"{ortalama:N2} ₺";
 
-        OrtalamaLabel.Text = islemSayisi > 0 ? $"{(toplamCiro / islemSayisi):N2} ₺" : "0.00 ₺";
-
-        AnalizleriDoldur(filtreliRaporlar);
-    }
-
-    private void AnalizleriDoldur(List<SatisRaporu> raporlar)
-    {
         UrunStatContainer.Children.Clear();
         SaatlikStatContainer.Children.Clear();
 
-        if (raporlar.Count == 0)
+        if (_filtreliRaporlar.Count == 0)
         {
-            UrunStatContainer.Children.Add(new Label { Text = "Veri yok", TextColor = Colors.Gray, HorizontalOptions = LayoutOptions.Center });
-            SaatlikStatContainer.Children.Add(new Label { Text = "Veri yok", TextColor = Colors.Gray, HorizontalOptions = LayoutOptions.Center });
+            UrunStatContainer.Children.Add(new Label { Text = "Bu tarihte veri yok.", TextColor = Microsoft.Maui.Graphics.Colors.Gray, HorizontalOptions = LayoutOptions.Center });
+            SaatlikStatContainer.Children.Add(new Label { Text = "Bu tarihte veri yok.", TextColor = Microsoft.Maui.Graphics.Colors.Gray, HorizontalOptions = LayoutOptions.Center });
             return;
         }
 
-        var urunSayilari = new Dictionary<string, int>();
+        var urunSatislar = UrunSatislariniHesapla();
+        var topUrunler = urunSatislar.OrderByDescending(x => x.Value).Take(3).ToList();
 
-        foreach (var rapor in raporlar)
+        int sira = 1;
+        foreach (var urun in topUrunler)
         {
-            if (!string.IsNullOrEmpty(rapor.UrunDetaylari))
-            {
-                var parcalar = rapor.UrunDetaylari.Split(',');
-                foreach (var parca in parcalar)
-                {
-                    var temizMetin = parca.Trim();
-                    int xIndex = temizMetin.IndexOf('x');
+            UrunStatContainer.Children.Add(new Label { Text = $"{sira}. {urun.Key} ({urun.Value} adet)", TextColor = Microsoft.Maui.Graphics.Color.FromArgb("#2C3E50"), FontAttributes = FontAttributes.Bold });
+            sira++;
+        }
 
-                    if (xIndex > 0 && int.TryParse(temizMetin.Substring(0, xIndex), out int adet))
-                    {
-                        string urunAdi = temizMetin.Substring(xIndex + 1).Trim();
-                        if (!urunSayilari.ContainsKey(urunAdi)) urunSayilari[urunAdi] = 0;
-                        urunSayilari[urunAdi] += adet;
-                    }
+        var yogunSaatler = YogunSaatleriHesapla().Take(3).ToList();
+        sira = 1;
+        foreach (var saat in yogunSaatler)
+        {
+            string saatAraligi = $"{saat.Saat:D2}:00 - {saat.Saat + 1:D2}:00";
+            SaatlikStatContainer.Children.Add(new Label { Text = $"{sira}. {saatAraligi} ({saat.IslemSayisi} sipariş)", TextColor = Microsoft.Maui.Graphics.Color.FromArgb("#2C3E50"), FontAttributes = FontAttributes.Bold });
+            sira++;
+        }
+    }
+
+    private Dictionary<string, int> UrunSatislariniHesapla()
+    {
+        var urunSatislar = new Dictionary<string, int>();
+        foreach (var rapor in _filtreliRaporlar)
+        {
+            if (string.IsNullOrEmpty(rapor.UrunDetaylari)) continue;
+            var kalemler = rapor.UrunDetaylari.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var kalem in kalemler)
+            {
+                var parcalar = kalem.Split(new[] { "x " }, StringSplitOptions.None);
+                if (parcalar.Length == 2 && int.TryParse(parcalar[0], out int miktar))
+                {
+                    string urunAdi = parcalar[1];
+                    if (!urunSatislar.ContainsKey(urunAdi)) urunSatislar[urunAdi] = 0;
+                    urunSatislar[urunAdi] += miktar;
+                }
+            }
+        }
+        return urunSatislar;
+    }
+
+    private List<(int Saat, int IslemSayisi)> YogunSaatleriHesapla()
+    {
+        return _filtreliRaporlar.GroupBy(x => x.Tarih.Hour)
+                                .Select(g => (Saat: g.Key, IslemSayisi: g.Count()))
+                                .OrderByDescending(x => x.IslemSayisi)
+                                .ToList();
+    }
+
+    private void TarihDegisti(object sender, DateChangedEventArgs e) => RaporuHesapla();
+    private async void Geri_Clicked(object sender, EventArgs e) => await Navigation.PopAsync();
+
+    // --- PAYLAŞMA SİSTEMİ (PC'DE PDF MASAÜSTÜNE, TELEFONDA WHATSAPP METNİ) ---
+    private async void RaporPaylas_Clicked(object sender, EventArgs e)
+    {
+        if (_filtreliRaporlar == null || _filtreliRaporlar.Count == 0)
+        {
+            await DisplayAlert("Hata", "İndirilecek veri bulunamadı.", "Tamam");
+            return;
+        }
+
+        string donemBaslik = seciliMod == "Gun" ? $"{RaporTarihSecici.Date:dd MMMM yyyy} Günlük" :
+                             seciliMod == "Ay" ? $"{RaporTarihSecici.Date:MMMM yyyy} Aylık" :
+                             $"{RaporTarihSecici.Date:yyyy} Yıllık";
+
+        double toplamNakit = 0, toplamKart = 0;
+        foreach (var r in _filtreliRaporlar)
+        {
+            if (!string.IsNullOrEmpty(r.OdemeTuru))
+            {
+                var parcalar = r.OdemeTuru.Split('/');
+                foreach (var p in parcalar)
+                {
+                    if (p.Contains("Nakit:")) { if (double.TryParse(p.Replace("Nakit:", "").Trim(), out double n)) toplamNakit += n; }
+                    if (p.Contains("Kart:")) { if (double.TryParse(p.Replace("Kart:", "").Trim(), out double k)) toplamKart += k; }
                 }
             }
         }
 
-        var enCokSatanlar = urunSayilari.OrderByDescending(x => x.Value).Take(3).ToList();
-        foreach (var u in enCokSatanlar)
-        {
-            UrunStatContainer.Children.Add(new Label { Text = $"• {u.Key} ({u.Value} adet)", FontSize = 13, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#2C3E50") });
-        }
-
-        var saatler = raporlar.GroupBy(x => x.Tarih.Hour)
-                              .Select(g => new { Saat = g.Key, Tutar = g.Sum(s => s.Tutar) })
-                              .OrderByDescending(o => o.Tutar)
-                              .Take(3).ToList();
-
-        foreach (var s in saatler)
-        {
-            SaatlikStatContainer.Children.Add(new Label { Text = $"• {s.Saat:00}:00 - {s.Tutar:N2} ₺", FontSize = 13, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#2C3E50") });
-        }
-    }
-
-    private void TarihDegisti(object sender, DateChangedEventArgs e) => RaporuHesapla();
-
-    private async void Geri_Clicked(object sender, EventArgs e) => await Navigation.PopAsync();
-
-    // ==============================================================
-    // PDF OLUŞTURMA VE CİHAZDA AÇMA BÖLÜMÜ
-    // ==============================================================
-    private async void RaporPaylas_Clicked(object sender, EventArgs e)
-    {
         try
         {
-            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
-
-            string klasor = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string dosyaAdi = $"Kafeson_Rapor_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
-            string tamYol = Path.Combine(klasor, dosyaAdi);
-
-            Document.Create(container =>
+#if WINDOWS
+            // 💻 BİLGİSAYAR: QuestPDF KULLANARAK MASAÜSTÜNE A4 PDF KAYDEDER
+            QuestPDF.Settings.License = LicenseType.Community;
+            var belge = Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Size(QuestPDF.Helpers.PageSizes.A4);
-                    page.Margin(2, QuestPDF.Infrastructure.Unit.Centimetre);
+                    page.Margin(1.5f, Unit.Centimetre);
                     page.PageColor(QuestPDF.Helpers.Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    page.DefaultTextStyle(x => x.FontSize(10).FontFamily(QuestPDF.Helpers.Fonts.Arial));
 
-                    page.Header().Text("KAFESON İŞLETME RAPORU")
-                        .SemiBold().FontSize(24).FontColor("#2C3E50");
-
-                    page.Content().PaddingVertical(1, QuestPDF.Infrastructure.Unit.Centimetre).Column(col =>
+                    page.Header().PaddingBottom(10).Column(col =>
                     {
-                        col.Spacing(15);
-
-                        col.Item().Text($"Rapor Tarihi: {RaporBaslikLabel.Text}").FontSize(14).Bold();
-                        col.Item().LineHorizontal(1).LineColor("#BDC3C7");
-
-                        col.Item().Text($"Toplam Ciro: {CiroLabel.Text}").Bold().FontSize(20).FontColor("#27AE60");
-                        col.Item().Text($"İşlem Sayısı: {AdetLabel.Text}");
-                        col.Item().Text($"Masa Başı Ortalama Harcama: {OrtalamaLabel.Text}");
-
-                        col.Item().LineHorizontal(1).LineColor("#BDC3C7");
-
-                        col.Item().Text("LİDER ÜRÜNLER").Bold().FontSize(14).FontColor("#E67E22");
-                        foreach (var child in UrunStatContainer.Children)
-                        {
-                            if (child is Label lbl && lbl.Text != "Veri yok")
-                                col.Item().Text(lbl.Text);
-                        }
-
-                        col.Item().PaddingTop(10).Text("ZİRVE SAATLER").Bold().FontSize(14).FontColor("#8E44AD");
-                        foreach (var child in SaatlikStatContainer.Children)
-                        {
-                            if (child is Label lbl && lbl.Text != "Veri yok")
-                                col.Item().Text(lbl.Text);
-                        }
+                        col.Item().Text("KAFESON").FontSize(26).SemiBold().FontColor(QuestPDF.Helpers.Colors.Blue.Darken2);
+                        col.Item().Text($"{donemBaslik} İşletme Raporu").FontSize(14).FontColor(QuestPDF.Helpers.Colors.Grey.Darken2);
+                        col.Item().Text($"Oluşturulma: {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(9).FontColor(QuestPDF.Helpers.Colors.Grey.Medium);
+                        col.Item().PaddingTop(5).LineHorizontal(1).LineColor(QuestPDF.Helpers.Colors.Grey.Lighten2);
                     });
 
-                    page.Footer().AlignCenter().Text(x =>
+                    page.Content().Column(col =>
                     {
-                        x.Span("Sayfa ");
-                        x.CurrentPageNumber();
-                        x.Span(" / ");
-                        x.TotalPages();
+                        col.Item().PaddingBottom(5).Text("1. FİNANSAL ÖZET").FontSize(12).SemiBold().FontColor(QuestPDF.Helpers.Colors.Blue.Darken2);
+                        col.Item().PaddingBottom(15).Table(table =>
+                        {
+                            table.ColumnsDefinition(columns => { columns.RelativeColumn(); columns.RelativeColumn(); });
+                            table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten3).Padding(4).Text("Toplam Ciro:");
+                            table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"{_filtreliRaporlar.Sum(x => x.Tutar):N2} TL").SemiBold();
+                            table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten3).Padding(4).Text("Tahsilat Dağılımı:");
+                            table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"Nakit: {toplamNakit:N2} TL  |  Kart: {toplamKart:N2} TL");
+                            table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten3).Padding(4).Text("Kapatılan Masa Sayısı:");
+                            table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"{_filtreliRaporlar.Count} Adet");
+                        });
+
+                        col.Item().PaddingBottom(5).Text("2. ÜRÜN SATIŞ ANALİZİ (TOP 10)").FontSize(12).SemiBold().FontColor(QuestPDF.Helpers.Colors.Blue.Darken2);
+                        col.Item().PaddingBottom(15).Table(table =>
+                        {
+                            table.ColumnsDefinition(columns => { columns.ConstantColumn(30); columns.RelativeColumn(); columns.ConstantColumn(80); });
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten4).Padding(4).Text("#").SemiBold();
+                                header.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten4).Padding(4).Text("Ürün Adı").SemiBold();
+                                header.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten4).Padding(4).AlignRight().Text("Satış Adedi").SemiBold();
+                            });
+                            var urunler = UrunSatislariniHesapla().OrderByDescending(x => x.Value).Take(10).ToList();
+                            int i = 1;
+                            foreach (var u in urunler)
+                            {
+                                table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten4).Padding(4).Text(i.ToString());
+                                table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten4).Padding(4).Text(u.Key);
+                                table.Cell().BorderBottom(1).BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten4).Padding(4).AlignRight().Text(u.Value.ToString());
+                                i++;
+                            }
+                        });
                     });
                 });
-            })
-            .GeneratePdf(tamYol);
-
-            await Launcher.OpenAsync(new OpenFileRequest
-            {
-                Title = "PDF Raporunu Görüntüle",
-                File = new ReadOnlyFile(tamYol)
             });
+
+            string dosyaAdi = $"Kafeson_Rapor_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
+            string masaustuYolu = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string dosyaYolu = Path.Combine(masaustuYolu, dosyaAdi);
+            belge.GeneratePdf(dosyaYolu);
+            await DisplayAlert("Başarılı", $"Rapor Masaüstüne kaydedildi.\n\nDosya: {dosyaAdi}", "Tamam");
+
+#else
+            // 📱 TELEFON: ÇÖKMEYİ %100 ÖNLER! WhatsApp İçin Düzenli Metin Oluşturup Paylaşır.
+            string ozetMetin = $"KAFESON {donemBaslik.ToUpper()} RAPORU\n" +
+                               $"Tarih: {DateTime.Now:dd.MM.yyyy HH:mm}\n" +
+                               $"-----------------------------------\n" +
+                               $"💰 TOPLAM CİRO: {_filtreliRaporlar.Sum(x => x.Tutar):N2} TL\n" +
+                               $"💵 Nakit: {toplamNakit:N2} TL\n" +
+                               $"💳 Kart: {toplamKart:N2} TL\n" +
+                               $"🍽️ Kapatılan Masa: {_filtreliRaporlar.Count} Adet\n" +
+                               $"-----------------------------------\n" +
+                               $"🏆 LİDER ÜRÜNLER (TOP 3)\n";
+
+            var topUrunler = UrunSatislariniHesapla().OrderByDescending(x => x.Value).Take(3).ToList();
+            int sira = 1;
+            foreach (var u in topUrunler)
+            {
+                ozetMetin += $"{sira}. {u.Key}: {u.Value} Adet\n";
+                sira++;
+            }
+
+            // Telefonun paylaşım menüsünü (WhatsApp, Mail vb.) açar
+            await Share.RequestAsync(new ShareTextRequest
+            {
+                Title = "Kafeson Raporunu Paylaş",
+                Text = ozetMetin,
+                Subject = "Kafeson İşletme Özeti"
+            });
+#endif
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Hata", $"PDF oluşturulurken bir sorun oluştu:\n{ex.Message}", "Tamam");
+            await DisplayAlert("Hata", $"İşlem sırasında bir sorun oluştu:\n{ex.Message}", "Tamam");
         }
     }
 }

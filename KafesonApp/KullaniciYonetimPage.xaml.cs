@@ -1,123 +1,192 @@
-using KafesonApp.Models;
-using System.Linq;
+#nullable disable
+using Kafeson.Shared.Models;
+using KafesonApp.Data;
+using Microsoft.Maui.Storage; // Eklendi
+using System.Collections.ObjectModel;
 
 namespace KafesonApp;
 
 public partial class KullaniciYonetimPage : ContentPage
 {
+    private readonly VeriServisi _servis = new VeriServisi();
+    public ObservableCollection<Kullanici> PersonelListesi { get; set; } = new();
+
+    // Düzenlenen kullanıcıyı aklında tutar
+    private Kullanici _duzenlenenKullanici = null;
+
     public KullaniciYonetimPage()
     {
         InitializeComponent();
+        BindingContext = this;
+
+        ListeyiYenile();
+        ListeView.ItemsSource = PersonelListesi;
     }
 
-    protected override void OnAppearing()
+    private void ListeyiYenile()
     {
-        base.OnAppearing();
-        ListeyiGuncelle();
-    }
+        PersonelListesi.Clear();
 
-    private void ListeyiGuncelle()
-    {
-        PersonelListesiView.ItemsSource = null;
-        PersonelListesiView.ItemsSource = App.Kullanicilar;
-    }
+        // Admin kullanıcısını cihaz hafızasından al ve her zaman en başa ekle
+        string adminKadi = Preferences.Default.Get("AdminKadi", "admin");
+        string adminSifre = Preferences.Default.Get("AdminSifre", "1234");
 
-    // --- YENİ PERSONEL EKLEME ---
-    private async void PersonelEkle_Clicked(object sender, EventArgs e)
-    {
-        string kadi = YeniKadiEntry.Text?.Trim();
-        string sifre = YeniSifreEntry.Text?.Trim();
-
-        if (string.IsNullOrEmpty(kadi) || string.IsNullOrEmpty(sifre))
+        PersonelListesi.Add(new Kullanici
         {
-            await DisplayAlert("Hata", "Lütfen kullanıcı adı ve şifre belirleyin.", "Tamam");
+            Id = 0, // Admin'in ID'si 0 olarak kabul edilir ki silinemesin
+            KullaniciAdi = adminKadi,
+            Sifre = adminSifre,
+            MasaYetkisi = true,
+            RaporYetkisi = true,
+            AyarlarYetkisi = true
+        });
+
+        // Veritabanındaki diğer personelleri ekle
+        if (App.Kullanicilar != null)
+        {
+            foreach (var k in App.Kullanicilar)
+                PersonelListesi.Add(k);
+        }
+    }
+
+    private void FormuTemizle()
+    {
+        _duzenlenenKullanici = null;
+        KullaniciAdiEntry.Text = "";
+        SifreEntry.Text = "";
+        MasaYetkisiSwitch.IsToggled = true;
+        RaporYetkisiSwitch.IsToggled = false;
+        AyarlarYetkisiSwitch.IsToggled = false;
+
+        BtnEkle.Text = "＋  PERSONELİ SİSTEME EKLE";
+        BtnEkle.BackgroundColor = Colors.Transparent;
+    }
+
+    private async void Ekle_Clicked(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(KullaniciAdiEntry.Text) || string.IsNullOrWhiteSpace(SifreEntry.Text))
+        {
+            await DisplayAlert("Hata", "Lütfen tüm alanları doldurun!", "Tamam");
             return;
         }
 
-        if (App.Kullanicilar.Any(x => x.KullaniciAdi.ToLower() == kadi.ToLower()))
+        BtnEkle.IsEnabled = false;
+
+        // --- GÜNCELLEME MODU ---
+        if (_duzenlenenKullanici != null)
         {
-            await DisplayAlert("Hata", "Bu kullanıcı adı zaten sistemde kayıtlı!", "Tamam");
-            return;
-        }
+            BtnEkle.Text = "GÜNCELLENİYOR...";
 
-        var yeniPersonel = new Kullanici
-        {
-            KullaniciAdi = kadi,
-            Sifre = sifre,
-            MasaYetkisi = ChkMasa.IsChecked,
-            RaporYetkisi = ChkRapor.IsChecked,
-            AyarlarYetkisi = ChkAyarlar.IsChecked
-        };
-
-        App.Kullanicilar.Add(yeniPersonel);
-        App.VerileriKaydet();
-
-        YeniKadiEntry.Text = "";
-        YeniSifreEntry.Text = "";
-        ChkMasa.IsChecked = true;
-        ChkRapor.IsChecked = false;
-        ChkAyarlar.IsChecked = false;
-
-        ListeyiGuncelle();
-        await DisplayAlert("Başarılı", $"{kadi} sisteme eklendi.", "Tamam");
-    }
-
-    // --- PERSONEL SİLME ---
-    private async void PersonelSil_Clicked(object sender, EventArgs e)
-    {
-        if (sender is Button btn && btn.CommandParameter is Kullanici seciliPersonel)
-        {
-            if (seciliPersonel.KullaniciAdi == "admin")
+            if (_duzenlenenKullanici.Id == 0)
             {
-                await DisplayAlert("Hata", "Ana yönetici hesabı (admin) silinemez!", "Tamam");
+                // Admin güncelleniyorsa veritabanına değil, güvenli şekilde cihaz hafızasına kaydedilir
+                Preferences.Default.Set("AdminKadi", KullaniciAdiEntry.Text);
+                Preferences.Default.Set("AdminSifre", SifreEntry.Text);
+
+                await DisplayAlert("Başarılı", "Kurucu Yöneticinin (Admin) bilgileri başarıyla güncellendi.", "Tamam");
+                FormuTemizle();
+                ListeyiYenile();
+            }
+            else
+            {
+                // Normal personel güncelleniyorsa veritabanına gidip güncellenir
+                _duzenlenenKullanici.KullaniciAdi = KullaniciAdiEntry.Text;
+                _duzenlenenKullanici.Sifre = SifreEntry.Text;
+                _duzenlenenKullanici.MasaYetkisi = MasaYetkisiSwitch.IsToggled;
+                _duzenlenenKullanici.RaporYetkisi = RaporYetkisiSwitch.IsToggled;
+                _duzenlenenKullanici.AyarlarYetkisi = AyarlarYetkisiSwitch.IsToggled;
+
+                if (await _servis.KullaniciGuncelle(_duzenlenenKullanici.Id, _duzenlenenKullanici))
+                {
+                    await App.ApiVerileriniCek();
+                    ListeyiYenile();
+                    FormuTemizle();
+                    await DisplayAlert("Başarılı", "Personel başarıyla güncellendi.", "Tamam");
+                }
+                else
+                {
+                    await DisplayAlert("Hata", "Güncelleme başarısız oldu, API bağlantınızı kontrol edin.", "Tamam");
+                }
+            }
+        }
+        // --- YENİ PERSONEL EKLEME MODU ---
+        else
+        {
+            BtnEkle.Text = "KAYDEDİLİYOR...";
+
+            var yeniKullanici = new Kullanici
+            {
+                KullaniciAdi = KullaniciAdiEntry.Text,
+                Sifre = SifreEntry.Text,
+                MasaYetkisi = MasaYetkisiSwitch.IsToggled,
+                RaporYetkisi = RaporYetkisiSwitch.IsToggled,
+                AyarlarYetkisi = AyarlarYetkisiSwitch.IsToggled
+            };
+
+            if (await _servis.KullaniciEkle(yeniKullanici))
+            {
+                await App.ApiVerileriniCek();
+                ListeyiYenile();
+                FormuTemizle();
+                await DisplayAlert("Başarılı", "Yeni personel sisteme tanımlandı.", "Tamam");
+            }
+            else
+            {
+                await DisplayAlert("Hata", "Personel eklenemedi, bağlantıyı kontrol edin.", "Tamam");
+            }
+        }
+
+        BtnEkle.IsEnabled = true;
+    }
+
+    private void Duzenle_Clicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Kullanici k)
+        {
+            _duzenlenenKullanici = k;
+
+            // Seçilen kullanıcının bilgilerini yukarıdaki forma doldurur
+            KullaniciAdiEntry.Text = k.KullaniciAdi;
+            SifreEntry.Text = k.Sifre;
+            MasaYetkisiSwitch.IsToggled = k.MasaYetkisi;
+            RaporYetkisiSwitch.IsToggled = k.RaporYetkisi;
+            AyarlarYetkisiSwitch.IsToggled = k.AyarlarYetkisi;
+
+            BtnEkle.Text = "📝  PERSONELİ GÜNCELLE";
+            BtnEkle.BackgroundColor = Color.FromArgb("#3B82F6"); // Güncelleme modunu belli etmek için mavi renk
+        }
+    }
+
+    private async void Sil_Clicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Kullanici k)
+        {
+            // Adminin silinmesini kesin olarak engeller
+            if (k.Id == 0)
+            {
+                await DisplayAlert("Uyarı", "Kurucu Yönetici (Admin) hesabı sistemden silinemez!", "Tamam");
                 return;
             }
 
-            bool cevap = await DisplayAlert("Uyarı", $"{seciliPersonel.KullaniciAdi} adlı personeli silmek istediğinize emin misiniz?", "Evet", "Hayır");
+            bool onayla = await DisplayAlert("Personel Sil",
+                $"{k.KullaniciAdi} isimli personeli silmek istediğinize emin misiniz?",
+                "Evet, Sil", "Vazgeç");
 
-            if (cevap)
+            if (onayla)
             {
-                App.Kullanicilar.Remove(seciliPersonel);
-                App.VerileriKaydet();
-                ListeyiGuncelle();
+                if (await _servis.KullaniciSil(k.Id))
+                {
+                    App.Kullanicilar.Remove(k);
+                    ListeyiYenile();
+
+                    // Eğer silinen kişiyi o an yukarıda düzenliyorsa, formu da sıfırla
+                    if (_duzenlenenKullanici?.Id == k.Id) FormuTemizle();
+                }
+                else
+                {
+                    await DisplayAlert("Hata", "Silme işlemi başarısız oldu.", "Tamam");
+                }
             }
         }
-    }
-
-    // --- DİNAMİK PERFORMANS EKRANINI AÇMA ---
-    private void PersonelPerformans_Clicked(object sender, EventArgs e)
-    {
-        if (sender is Button btn && btn.CommandParameter is Kullanici seciliPersonel)
-        {
-            // İlgili personelin satışlarını Raporlar listesinden bul
-            var personelinSatislari = App.SatisRaporlari?
-                .Where(x => x.PersonelAdi != null && x.PersonelAdi.ToLower() == seciliPersonel.KullaniciAdi.ToLower())
-                .OrderByDescending(x => x.Tarih)
-                .ToList() ?? new List<SatisRaporu>();
-
-            // İstatistikleri hesapla
-            double ciro = personelinSatislari.Sum(x => x.Tutar);
-            int islem = personelinSatislari.Count;
-
-            // Ekrana yazdır
-            PerfKullaniciLabel.Text = $"{seciliPersonel.KullaniciAdi.ToUpper()} PERFORMANSI";
-            PerfCiroLabel.Text = $"{ciro:N2} ₺";
-            PerfIslemLabel.Text = $"{islem}";
-            PerfOrtalamaLabel.Text = islem > 0 ? $"{(ciro / islem):N2} ₺" : "0.00 ₺";
-
-            // Son işlemleri listeye bağla
-            PerfIslemlerListesi.ItemsSource = personelinSatislari;
-
-            // Formu Gizle, Performans Panelini Göster (Şık animasyonsuz geçiş)
-            YeniPersonelFormu.IsVisible = false;
-            PerformansPaneli.IsVisible = true;
-        }
-    }
-
-    // --- PERFORMANS EKRANINI KAPATMA (Tekrar Forma Dönme) ---
-    private void PerformansKapat_Clicked(object sender, EventArgs e)
-    {
-        PerformansPaneli.IsVisible = false;
-        YeniPersonelFormu.IsVisible = true;
     }
 }

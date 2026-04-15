@@ -1,104 +1,138 @@
-﻿using KafesonApp.Models;
-using Microsoft.Maui.Controls.Shapes; // Yuvarlak hatlar (RoundRectangle) için gerekli kütüphane
+﻿using Kafeson.Shared.Models;
+using KafesonApp.Data;
+using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Dispatching; // Timer için gerekli kütüphane eklendi
 
-namespace KafesonApp;
+namespace KafesonApp.Views;
 
 public partial class MasalarPage : ContentPage
 {
-    string _seciliMekan = "İç Mekan";
+    private string _seciliMekan = "İç Mekan";
+
+    // 🚨 1. ADIM: CANLI YENİLEME MOTORU TANIMLANDI
+    private IDispatcherTimer _canliMotor;
 
     public MasalarPage()
     {
         InitializeComponent();
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        MasalariYukle();
+        await VerileriYukle();
+
+        // 🚨 2. ADIM: MOTORU ÇALIŞTIR (Her 2 saniyede bir sessizce verileri günceller)
+        if (_canliMotor == null)
+        {
+            _canliMotor = Application.Current.Dispatcher.CreateTimer();
+            _canliMotor.Interval = TimeSpan.FromSeconds(2); // ŞAK diye düşmesi için 2 saniye idealdir
+            _canliMotor.Tick += async (s, e) => await VerileriYukle();
+        }
+        _canliMotor.Start();
     }
 
-    private void MekanSec_Clicked(object sender, EventArgs e)
+    protected override void OnDisappearing()
     {
-        var buton = (Button)sender;
-        _seciliMekan = buton.CommandParameter.ToString();
+        base.OnDisappearing();
 
-        // Seçilen mekana göre butonların renklerini güncelle (Animasyonlu geçiş hissi verir)
-        BtnIcMekan.BackgroundColor = _seciliMekan == "İç Mekan" ? Color.FromArgb("#3B82F6") : Colors.Transparent;
-        BtnIcMekan.TextColor = _seciliMekan == "İç Mekan" ? Colors.White : Color.FromArgb("#94A3B8");
-
-        BtnBahce.BackgroundColor = _seciliMekan == "Bahçe" ? Color.FromArgb("#3B82F6") : Colors.Transparent;
-        BtnBahce.TextColor = _seciliMekan == "Bahçe" ? Colors.White : Color.FromArgb("#94A3B8");
-
-        MasalariYukle();
+        // 🚨 3. ADIM: BAŞKA SAYFAYA GEÇİNCE MOTORU DURDUR (İnterneti ve pili sömürmemesi için)
+        if (_canliMotor != null && _canliMotor.IsRunning)
+        {
+            _canliMotor.Stop();
+        }
     }
 
-    private void MasalariYukle()
+    private async Task VerileriYukle()
+    {
+        await App.ApiVerileriniCek();
+        MasaListesiniCiz();
+    }
+
+    private void MasaListesiniCiz()
     {
         MasalarContainer.Children.Clear();
-        var filtrelenmisMasalar = App.Masalar.Where(m => m.Mekan == _seciliMekan).ToList();
 
-        foreach (var masa in filtrelenmisMasalar)
+        var gosterilecekMasalar = App.Masalar
+            .Where(m => m.Mekan == _seciliMekan)
+            .OrderBy(m => m.No)
+            .ToList();
+
+        foreach (var masa in gosterilecekMasalar)
         {
-            // Modern Zümrüt Yeşili ve Canlı Kırmızı
-            var bosRenk = Color.FromArgb("#10B981");
-            var doluRenk = Color.FromArgb("#EF4444");
-            var arkaPlan = masa.IsDolu ? doluRenk : bosRenk;
-
-            // Masayı temsil eden ana kart
-            var cardBorder = new Border
+            var border = new Border
             {
-                WidthRequest = 160,
-                HeightRequest = 160,
-                Margin = new Thickness(10),
-                BackgroundColor = arkaPlan,
                 StrokeThickness = 0,
-                Padding = new Thickness(15),
-                StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(20) },
-                Shadow = new Shadow { Brush = Colors.Black, Offset = new Point(0, 6), Opacity = 0.2f, Radius = 10 }
+                BackgroundColor = masa.IsDolu ? Color.FromArgb("#EF4444") : Color.FromArgb("#10B981"),
+                WidthRequest = 160,
+                HeightRequest = 140,
+                Margin = new Thickness(10, 10),
+                StrokeShape = new RoundRectangle { CornerRadius = 15 },
+                Shadow = new Shadow { Brush = Brush.Black, Offset = new Point(0, 4), Radius = 8, Opacity = 0.15f }
             };
 
-            // Kartın içindeki yazıları alt alta dizecek yapı
-            var layout = new VerticalStackLayout { Spacing = 5, VerticalOptions = LayoutOptions.Center };
+            var stack = new VerticalStackLayout
+            {
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.Center,
+                Spacing = 8
+            };
 
-            layout.Children.Add(new Label
+            stack.Children.Add(new Label
             {
                 Text = $"MASA {masa.No}",
-                TextColor = Colors.White,
-                FontSize = 22,
+                FontSize = 24,
                 FontAttributes = FontAttributes.Bold,
+                TextColor = Colors.White,
                 HorizontalOptions = LayoutOptions.Center
             });
 
             if (masa.IsDolu)
             {
-                string gecenSure = "Yeni";
-                if (masa.AcilisZamani.HasValue)
-                {
-                    var fark = DateTime.Now - masa.AcilisZamani.Value;
-                    gecenSure = $"{Math.Floor(fark.TotalMinutes)} dk";
-                }
+                stack.Children.Add(new Label { Text = $"{masa.ToplamTutar:N2} ₺", FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalOptions = LayoutOptions.Center });
 
-                layout.Children.Add(new Label { Text = "DOLU", TextColor = Colors.White, FontSize = 12, HorizontalOptions = LayoutOptions.Center, Opacity = 0.8 });
-                layout.Children.Add(new BoxView { HeightRequest = 1, Color = Colors.White, Opacity = 0.3, Margin = new Thickness(0, 5) });
-                layout.Children.Add(new Label { Text = $"{masa.ToplamTutar:N2} ₺", TextColor = Colors.White, FontSize = 18, FontAttributes = FontAttributes.Bold, HorizontalOptions = LayoutOptions.Center });
-                layout.Children.Add(new Label { Text = $"🕒 {gecenSure}", TextColor = Colors.White, FontSize = 12, HorizontalOptions = LayoutOptions.Center, Opacity = 0.9 });
+                if (!string.IsNullOrEmpty(masa.GecenSure))
+                {
+                    stack.Children.Add(new Label { Text = masa.GecenSure, FontSize = 14, TextColor = Color.FromArgb("#FEF08A"), HorizontalOptions = LayoutOptions.Center });
+                }
             }
             else
             {
-                layout.Children.Add(new Label { Text = "BOŞ", TextColor = Colors.White, FontSize = 14, HorizontalOptions = LayoutOptions.Center, Opacity = 0.9, Margin = new Thickness(0, 10, 0, 0) });
+                stack.Children.Add(new Label { Text = "BOŞ", FontSize = 18, FontAttributes = FontAttributes.Bold, TextColor = Colors.White, HorizontalOptions = LayoutOptions.Center });
             }
 
-            cardBorder.Content = layout;
+            border.Content = stack;
 
-            // Karta Tıklama Özelliği Ekleme
             var tapGesture = new TapGestureRecognizer();
-            tapGesture.Tapped += async (s, e) => {
-                await Navigation.PushAsync(new SiparisPage(masa));
-            };
-            cardBorder.GestureRecognizers.Add(tapGesture);
+            tapGesture.Tapped += async (s, e) => { await Navigation.PushAsync(new SiparisPage(masa)); };
+            border.GestureRecognizers.Add(tapGesture);
 
-            MasalarContainer.Children.Add(cardBorder);
+            MasalarContainer.Children.Add(border);
+        }
+    }
+
+    private void MekanSec_Clicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            _seciliMekan = btn.CommandParameter.ToString();
+
+            if (_seciliMekan == "İç Mekan")
+            {
+                BtnIcMekan.BackgroundColor = Color.FromArgb("#3B82F6");
+                BtnIcMekan.TextColor = Colors.White;
+                BtnBahce.BackgroundColor = Colors.Transparent;
+                BtnBahce.TextColor = Color.FromArgb("#94A3B8");
+            }
+            else
+            {
+                BtnBahce.BackgroundColor = Color.FromArgb("#3B82F6");
+                BtnBahce.TextColor = Colors.White;
+                BtnIcMekan.BackgroundColor = Colors.Transparent;
+                BtnIcMekan.TextColor = Color.FromArgb("#94A3B8");
+            }
+
+            MasaListesiniCiz();
         }
     }
 

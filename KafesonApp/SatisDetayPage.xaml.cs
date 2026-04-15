@@ -1,4 +1,4 @@
-using KafesonApp.Models;
+using Kafeson.Shared.Models;
 
 namespace KafesonApp;
 

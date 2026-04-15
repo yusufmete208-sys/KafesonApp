@@ -7,41 +7,66 @@
 
     <Grid>
         <Border HorizontalOptions="Center" VerticalOptions="Center"
-                WidthRequest="{OnIdiom Phone='320', Desktop='400'}"
-                BackgroundColor="White" StrokeShape="RoundRectangle 20" 
-                StrokeThickness="0" Padding="30">
-
+                WidthRequest="{OnIdiom Phone='300', Desktop='360'}"
+                MaximumWidthRequest="380"
+                BackgroundColor="White" StrokeShape="RoundRectangle 24" 
+                StrokeThickness="0" Padding="25,30">
             <Border.Shadow>
-                <Shadow Brush="Black" Offset="0,10" Radius="20" Opacity="0.1"/>
+                <Shadow Brush="Black" Offset="0,12" Radius="25" Opacity="0.12"/>
             </Border.Shadow>
 
-            <VerticalStackLayout Spacing="20">
-                <Label Text="☕" FontSize="60" HorizontalOptions="Center"/>
-                <Label Text="KAFESON" FontSize="28" FontAttributes="Bold" TextColor="#2C3E50" HorizontalOptions="Center"/>
-                <Label Text="Sisteme giriş yapmak için bilgilerinizi giriniz." FontSize="13" TextColor="#7F8C8D" HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="0,-10,0,10"/>
+            <VerticalStackLayout Spacing="15">
 
-                <Border BackgroundColor="#F8F9FA" StrokeThickness="1" Stroke="#E2E8F0" StrokeShape="RoundRectangle 10" Padding="15,5">
-                    <Entry x:Name="KadiEntry" 
-                           Placeholder="Kullanıcı Adı" 
-                           TextColor="#2C3E50" 
-                           ClearButtonVisibility="WhileEditing"
-                           ReturnType="Next"/>
-                </Border>
+                <Image Source="logo_kafeson.png" 
+                       HeightRequest="180" 
+                       WidthRequest="180" 
+                       HorizontalOptions="Center" 
+                       Margin="0,0,0,0"/>
 
-                <Border BackgroundColor="#F8F9FA" StrokeThickness="1" Stroke="#E2E8F0" StrokeShape="RoundRectangle 10" Padding="15,5">
-                    <Entry x:Name="SifreEntry" 
-                           Placeholder="Şifre" 
-                           IsPassword="True" 
-                           TextColor="#2C3E50" 
-                           ClearButtonVisibility="WhileEditing"
-                           ReturnType="Go"
-                           Completed="GirisYap_Clicked"/>
-                </Border>
+                <Label Text="Sisteme giriş yapmak için bilgilerinizi giriniz." 
+                       FontSize="13" TextColor="#718096" 
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" 
+                       Margin="0,-5,0,5"/>
+
+                <VerticalStackLayout Spacing="10">
+                    <Border BackgroundColor="#F7FAFC" StrokeThickness="1" Stroke="#E2E8F0" StrokeShape="RoundRectangle 12" Padding="15,5">
+                        <Entry x:Name="KadiEntry" 
+                               Placeholder="Kullanıcı Adı" 
+                               TextColor="#2D3748" 
+                               PlaceholderColor="#A0AEC0"
+                               ClearButtonVisibility="WhileEditing"/>
+                    </Border>
+
+                    <Border BackgroundColor="#F7FAFC" StrokeThickness="1" Stroke="#E2E8F0" StrokeShape="RoundRectangle 12" Padding="15,5">
+                        <Entry x:Name="SifreEntry" 
+                               Placeholder="Şifre" 
+                               IsPassword="True" 
+                               TextColor="#2D3748" 
+                               PlaceholderColor="#A0AEC0"
+                               ClearButtonVisibility="WhileEditing"
+                               Completed="GirisYap_Clicked"/>
+                    </Border>
+                </VerticalStackLayout>
 
                 <Button Text="GİRİŞ YAP" Clicked="GirisYap_Clicked" 
                         BackgroundColor="#27AE60" TextColor="White" 
                         FontAttributes="Bold" FontSize="16" 
-                        CornerRadius="10" HeightRequest="55" Margin="0,10,0,0"/>
+                        CornerRadius="12" HeightRequest="55" Margin="0,10,0,0">
+                    <Button.Shadow>
+                        <Shadow Brush="#27AE60" Offset="0,4" Opacity="0.3" Radius="8"/>
+                    </Button.Shadow>
+                </Button>
+
+                <Label Text="Şifremi Unuttum" 
+                       TextColor="#718096" 
+                       FontSize="13" 
+                       HorizontalOptions="Center" 
+                       Margin="0,5,0,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="SifremiUnuttum_Tapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+
             </VerticalStackLayout>
         </Border>
     </Grid>

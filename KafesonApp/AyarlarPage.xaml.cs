@@ -1,4 +1,9 @@
-﻿using KafesonApp.Models;
+﻿#nullable disable
+using Kafeson.Shared.Models;
+using KafesonApp.Data;
+using KafesonApp.Views; // Kendi Views klasörün
+using Microsoft.Maui.Devices;
+using System.Reflection;
 
 namespace KafesonApp;
 
@@ -8,74 +13,110 @@ public partial class AyarlarPage : ContentPage
     {
         InitializeComponent();
 
-        // --- GÜVENLİK KONTROLÜ ---
-        // Eğer giriş yapan yoksa veya 'AyarlarYetkisi' (Yönetim Paneli) izni yoksa içeri alma.
         if (App.AktifKullanici == null || !App.AktifKullanici.AyarlarYetkisi)
         {
             DisplayAlert("Yetkisiz Giriş", "Bu alana giriş yetkiniz bulunmamaktadır.", "Tamam");
-            Navigation.PopAsync(); // Ana menüye geri at
+            Navigation.PopAsync();
+            return;
+        }
+
+        if (DeviceInfo.Idiom == DeviceIdiom.Phone)
+        {
+            ContentArea.IsVisible = false;
         }
     }
 
-
     private async void MenuSec_Clicked(object sender, EventArgs e)
     {
-        // Tıklanan butonu ve parametresini alıyoruz
         if (sender is not Button btn || btn.CommandParameter == null) return;
-
         string secim = btn.CommandParameter.ToString();
+
+        if (secim == "Geri")
+        {
+            if (DeviceInfo.Idiom == DeviceIdiom.Phone && ContentArea.IsVisible)
+            {
+                ContentArea.IsVisible = false;
+                MobilKartlarAlani.IsVisible = true;
+                MobilBaslikLabel.Text = "YÖNETİM PANELİ";
+                MobilAltBaslikLabel.Text = "Sistem ve Personel Kontrol Merkezi";
+                ContentArea.Content = VarsayilanIcerik;
+                return;
+            }
+            await Navigation.PopAsync();
+            return;
+        }
 
         try
         {
+            object sayfaNesnesi = null;
+            string baslik = "AYARLAR";
+
             switch (secim)
             {
-                case "MenuListesi":
-                    // Sağ taraftaki alana (ContentArea) Menü Listesini getirir
-                    ContentArea.Content = new MenuGosterimView();
-                    break;
+                case "MenuListesi": baslik = "MENÜ LİSTESİ"; sayfaNesnesi = new MenuGosterimView(); break;
+                case "YeniKayit": baslik = "YENİ ÜRÜN EKLE"; sayfaNesnesi = new YeniUrunKayitView(); break;
+                case "FiyatGuncelle": baslik = "FİYAT GÜNCELLE"; sayfaNesnesi = new FiyatRevizeView(); break;
+                case "MasaDuzenle": baslik = "MASA DÜZENİ"; sayfaNesnesi = new MasaYonetimView(); break;
+                case "PersonelKontrol": baslik = "PERSONEL KONTROL"; sayfaNesnesi = new KullaniciYonetimPage(); break;
+                case "BaglantiAyar": baslik = "BAĞLANTI VE QR"; sayfaNesnesi = new BaglantiAyarView(); break;
 
-                case "YeniKayit":
-                    // Ürün Ekleme ekranını getirir
-                    ContentArea.Content = new YeniUrunKayitView();
-                    break;
-
-                case "MasaDuzenle":
-                    // Masa Ekle/Çıkar ekranını getirir
-                    ContentArea.Content = new MasaYonetimView();
-                    break;
-
-                case "FiyatGuncelle":
-                    // Fiyat Güncelleme ekranını getirir
-                    ContentArea.Content = new FiyatRevizeView();
-                    break;
-
-                case "PersonelKontrol":
-                    // Personel Yönetimi sayfası tam ekran açılır
-                    await Navigation.PushAsync(new KullaniciYonetimPage());
-                    break;
-
+                // 🚨 KAPANAN MASALAR İÇİN ZORLA VERİ ÇEKME
                 case "KapananMasalar":
-                    // Kapanan Masalar (Geçmiş) sayfası tam ekran açılır
-                    await Navigation.PushAsync(new KapananMasalar1View());
+                    baslik = "GEÇMİŞ KAYITLAR";
+                    var kapananMasalar = new KapananMasalar1View();
+                    await kapananMasalar.VerileriYukle();
+                    sayfaNesnesi = kapananMasalar;
                     break;
 
+                // 🚨 SİSTEM LOGLARI İÇİN ZORLA VERİ ÇEKME 🚨
                 case "SistemLoglari":
-                    // 🟢 YENİ EKLENEN: Sistem Logları sayfası tam ekran açılır
-                    await Navigation.PushAsync(new SistemLogsPage());
+                    baslik = "SİSTEM LOGLARI";
+                    var loglarSayfasi = new LoglarPage();
+                    await loglarSayfasi.LoglariYukle(); // LoglarPage.xaml.cs içinde public yaptığımız metod
+                    sayfaNesnesi = loglarSayfasi;
                     break;
+            }
 
-                case "Geri":
-                    // Ana Sayfaya (MainPage) geri döner
-                    await Navigation.PopAsync();
-                    break;
+            if (sayfaNesnesi == null) return;
 
+            View gosterilecekIcerik = null;
+
+            if (sayfaNesnesi is ContentPage cp)
+            {
+                gosterilecekIcerik = cp.Content;
+
+                // Diğer sayfalar için eski tetikleyici (Reflection) çalışmaya devam etsin
+                if (secim != "KapananMasalar" && secim != "SistemLoglari")
+                {
+                    try
+                    {
+                        var onAppearingMetodu = cp.GetType().GetMethod("OnAppearing", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+                        onAppearingMetodu?.Invoke(cp, null);
+                    }
+                    catch { }
+                }
+            }
+            else if (sayfaNesnesi is View v)
+            {
+                gosterilecekIcerik = v;
+            }
+
+            if (gosterilecekIcerik != null)
+            {
+                ContentArea.Content = gosterilecekIcerik;
+
+                if (DeviceInfo.Idiom == DeviceIdiom.Phone)
+                {
+                    MobilKartlarAlani.IsVisible = false;
+                    ContentArea.IsVisible = true;
+                    MobilBaslikLabel.Text = baslik;
+                    MobilAltBaslikLabel.Text = "Çıkmak için geri okuna basınız";
+                }
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Hata", "Sayfa yüklenirken bir sorun oluştu: " + ex.Message, "Tamam");
+            await DisplayAlert("Modül Hatası", "Sayfa yüklenirken hata oluştu: " + ex.Message, "Tamam");
         }
     }
-
-   
 }

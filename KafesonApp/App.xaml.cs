@@ -1,152 +1,93 @@
-﻿using KafesonApp.Models;
+﻿
+global using Kafeson.Shared;
+global using Kafeson.Shared.Models;
+global using KafesonApp.Data;#nullable disable
+using Kafeson.Shared.Models;
+using KafesonApp.Data;
 using System.Collections.ObjectModel;
-using System.Text.Json;
-using System.IO; // Path ve File işlemleri için ŞART
-using System.Linq; // .ToList() ve LINQ işlemleri için ŞART
+using System.Net.Sockets; // RADAR İÇİN EKLENDİ
+using Microsoft.Maui.Storage; // BİLGİSAYARIN IP'SİNİ KAYDETMEK İÇİN EKLENDİ
 
 namespace KafesonApp;
 
 public partial class App : Application
 {
-    public static Kullanici? AktifKullanici { get; set; }
+    public static Kullanici AktifKullanici { get; set; }
 
     public static ObservableCollection<Kullanici> Kullanicilar { get; set; } = new();
     public static ObservableCollection<Masa> Masalar { get; set; } = new();
-    public static ObservableCollection<Satis> KapananMasalar { get; set; } = new();
     public static ObservableCollection<Urun> Urunler { get; set; } = new();
     public static ObservableCollection<SatisRaporu> SatisRaporlari { get; set; } = new();
     public static ObservableCollection<MutfakSiparisi> MutfakSiparisleri { get; set; } = new();
 
-    // --- YENİ EKLENEN: LOG LİSTESİ ---
-    public static ObservableCollection<SistemLog> SistemLoglari { get; set; } = new();
-
     public static ObservableCollection<MutfakSiparisi> MutfakListesi => MutfakSiparisleri;
     public static ObservableCollection<Urun> TumUrunler => Urunler;
-
-    private static string dosyaYolu = Path.Combine(FileSystem.AppDataDirectory, "kafeson_final_data.json");
 
     public App()
     {
         InitializeComponent();
+        MainPage = new NavigationPage(new LoginPage());
 
-        VerileriYukle();
-
-        if (Kullanicilar.Count == 0)
-        {
-            Kullanicilar.Add(new Kullanici
-            {
-                KullaniciAdi = "admin",
-                Sifre = "1234",
-                MasaYetkisi = true,
-                RaporYetkisi = true,
-                AyarlarYetkisi = true
-            });
-            VerileriKaydet();
-        }
-
-        if (Masalar.Count == 0)
-        {
-            for (int i = 1; i <= 20; i++) Masalar.Add(new Masa { No = i, IsDolu = false });
-        }
-
-        // =================================================================
-        // --- YENİ EKLENEN: SADECE WINDOWS'TA KASAYI (SUNUCUYU) BAŞLAT ---
-        // =================================================================
-#if WINDOWS
-        var sunucu = new KafesonApp.Data.YerelSunucu();
-        sunucu.Baslat();
-#endif
+        // 🚨 SİHİRLİ DOKUNUŞ: Uygulama açıldığı an arka planda Kasa'yı aramaya başla
+        OtomatikKasaBulVeBaglan();
     }
 
-    protected override Window CreateWindow(IActivationState? activationState)
-    {
-        return new Window(new NavigationPage(new LoginPage()));
-    }
-
-    // --- YENİ EKLENEN: HER YERDEN ÇAĞIRILABİLECEK LOG EKLEME KOMUTU ---
-    public static void LogEkle(string islemTuru, string detay)
-    {
-        string personel = AktifKullanici != null ? AktifKullanici.KullaniciAdi : "Admin";
-
-        var yeniLog = new SistemLog
-        {
-            Tarih = DateTime.Now,
-            PersonelAdi = personel,
-            IslemTuru = islemTuru,
-            Detay = detay
-        };
-
-        SistemLoglari.Insert(0, yeniLog);
-        VerileriKaydet(); // Log eklendiğinde JSON dosyasına anında kaydet
-    }
-
-    // --- LOG EKLEME METODU ---
-    public static void LogEkle(string mesaj, string tip = "Genel")
-    {
-        // Listenin en başına ekle
-        Loglar.Insert(0, new LogKaydi
-        {
-            Mesaj = mesaj,
-            IslemTipi = tip,
-            Tarih = DateTime.Now
-        });
-
-        VerileriKaydet();
-    }
-
-    public static void VerileriKaydet()
+    // 🚨 RADAR MOTORUNUN KENDİSİ (Senin yazdığın UdpDinleyici sınıfını kullanır) 🚨
+    private async void OtomatikKasaBulVeBaglan()
     {
         try
         {
-            var veriPaketi = new
+            // Senin kendi yazdığın o harika sınıfı çağırıyoruz
+            var dinleyici = new UdpDinleyici();
+            string kasaIpAdresi = await dinleyici.OtomatikKasaBulAsync();
+
+            // Eğer 3 saniye içinde Kasa'yı duyduysa ve IP'yi aldıysa
+            if (!string.IsNullOrEmpty(kasaIpAdresi))
             {
-                Kullanicilar = Kullanicilar.ToList(),
-                KayitliMasalar = Masalar.ToList(),
-                KayitliUrunler = Urunler.ToList(),
-                KayitliRaporlar = SatisRaporlari.ToList(),
-                KayitliLoglar = SistemLoglari.ToList() // LOGLARI DA KAYDEDİYORUZ
-            };
-            string json = JsonSerializer.Serialize(veriPaketi);
-            File.WriteAllText(dosyaYolu, json);
+                // 1. Yakalanan IP'yi telefona sessizce kaydet
+                Preferences.Default.Set("SunucuIP", kasaIpAdresi);
+
+                // 2. Yeni IP ile API'den güncel verileri hemen çekip masaları doldur!
+                await ApiVerileriniCek();
+            }
         }
-        catch { }
+        catch
+        {
+            // Bulamazsa kimseyi rahatsız etmeden eski kayıtlı IP ile devam et
+        }
     }
 
-    private static void VerileriYukle()
+    public static async Task ApiVerileriniCek()
     {
-        // EĞER ANDROID (TELEFON) İSE: Kendi içindeki dosyayı yükleme! 
-        // Çünkü o dosya eski veya boştur. Her şeyi kasadan çekeceğiz.
-#if ANDROID
-        return;
-#endif
-
-        // PC (Windows) ise normal yüklemeye devam et
-        if (!File.Exists(dosyaYolu)) return;
-
         try
         {
-            string jsonString = File.ReadAllText(dosyaYolu);
-            var veri = JsonSerializer.Deserialize<VeriDeposu>(jsonString);
+            var servis = new VeriServisi();
+            var paket = await servis.KasadanHerSeyiGetir();
 
-            if (veri != null)
+            if (paket != null)
             {
-                Kullanicilar.Clear(); foreach (var k in veri.Kullanicilar) Kullanicilar.Add(k);
-                Masalar.Clear(); foreach (var m in veri.KayitliMasalar) Masalar.Add(m);
-                Urunler.Clear(); foreach (var u in veri.KayitliUrunler) Urunler.Add(u);
-                SatisRaporlari.Clear(); foreach (var r in veri.KayitliRaporlar) SatisRaporlari.Add(r);
-                SistemLoglari.Clear(); foreach (var l in veri.KayitliLoglar) SistemLoglari.Add(l);
+                // DÜZELTİLEN YER TAM OLARAK BURASI!
+                // Artık "BeginInvoke..." yerine "await ... InvokeAsync" kullanıyoruz ki 
+                // telefon listeyi doldurmadan sayfayı çizmeye çalışmasın.
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Kullanicilar.Clear(); foreach (var k in paket.Kullanicilar) Kullanicilar.Add(k);
+                    Masalar.Clear(); foreach (var m in paket.Masalar) Masalar.Add(m);
+                    Urunler.Clear(); foreach (var u in paket.Urunler) Urunler.Add(u);
+                    MutfakSiparisleri.Clear(); foreach (var ms in paket.MutfakSiparisleri) MutfakSiparisleri.Add(ms);
+                });
             }
         }
         catch { }
     }
 
-    // --- VERİ SAKLAMA SINIFI (Hata almamak için burayı kontrol et) ---
-    private class VeriDeposu
+    public static async Task LogEkle(string islem, string detay, int masaNo = 0)
     {
-        public List<Kullanici> Kullanicilar { get; set; } = new();
-        public List<Masa> KayitliMasalar { get; set; } = new();
-        public List<Urun> KayitliUrunler { get; set; } = new();
-        public List<SatisRaporu> KayitliRaporlar { get; set; } = new();
-        public List<SistemLog> KayitliLoglar { get; set; } = new(); // DEPODA LOGLAR İÇİN YER AÇTIK
+        try
+        {
+            var servis = new VeriServisi();
+            await servis.LogGonder(masaNo, islem, detay);
+        }
+        catch { }
     }
 }

@@ -1,57 +1,45 @@
-using KafesonApp.Models;
+ï»¿using Kafeson.Shared.Models;
+using KafesonApp.Data;
 using System.Linq;
 
 namespace KafesonApp;
 
 public partial class KapananMasalar1View : ContentPage
 {
+    private readonly VeriServisi _servis = new VeriServisi();
+
     public KapananMasalar1View()
     {
         InitializeComponent();
-
-        // 1. ADIM: Sayfa açýldýðýnda tarih seçiciyi bugüne ayarla
-        TarihSecici.Date = DateTime.Today;
-
-        // 2. ADIM: Sadece bugünkü verileri filtreleyip göster
-        VerileriFiltrele(DateTime.Today);
     }
 
-    private async void GeriDon_Clicked(object sender, EventArgs e) => await Navigation.PopAsync();
-
-    private async void OnMasaTapped(object sender, EventArgs e)
+    protected override async void OnAppearing()
     {
-        var frame = sender as Frame;
-        var tapGesture = frame.GestureRecognizers[0] as TapGestureRecognizer;
-        var secilenSatis = tapGesture.CommandParameter as Satis;
+        base.OnAppearing();
+        await VerileriYukle();
+    }
 
-        if (secilenSatis != null)
+    public async Task VerileriYukle()
+    {
+        try
         {
-            await Navigation.PushModalAsync(new SatisDetayPage(secilenSatis));
+            var raporlar = await _servis.RaporlariGetir();
+            if (raporlar != null)
+            {
+                var liste = raporlar.OrderByDescending(x => x.Tarih).ToList();
+                GecmisListesi.ItemsSource = liste;
+
+                double toplam = liste.Sum(x => x.Tutar);
+                int adet = liste.Count;
+
+                if (IslemSayisiLabel != null) IslemSayisiLabel.Text = $"{adet} Ä°ÅŸlem";
+                if (ToplamTutarLabel != null) ToplamTutarLabel.Text = $"{toplam:N2} â‚º";
+            }
         }
-    }
-
-    // 3. ADIM: Tarih deðiþtiðinde çalýþacak filtreleme mantýðý
-    private void TarihDegisti(object sender, DateChangedEventArgs e)
-    {
-        VerileriFiltrele(e.NewDate);
-    }
-
-    // Ortak filtreleme metodu
-    // Ortak filtreleme metodu - HATALAR DÜZELTÝLDÝ
-    private void VerileriFiltrele(DateTime hedefTarih)
-    {
-        // KapanisZamani zaten DateTime olduðu için .HasValue ve .Value kullanmaya gerek yoktur.
-        var filtrelenmis = App.KapananMasalar
-            .Where(x => x.KapanisZamani.Date == hedefTarih.Date)
-            .OrderByDescending(x => x.KapanisZamani)
-            .ToList();
-
-        KapananMasalarListesi.ItemsSource = filtrelenmis;
-    }
-
-    private void TumunuGoster_Clicked(object sender, EventArgs e)
-    {
-        // Ýsterseniz bu butonu kaldýrabilir veya tüm geçmiþi görmek için tutabilirsiniz
-        KapananMasalarListesi.ItemsSource = App.KapananMasalar;
+        catch (Exception ex)
+        {
+            // ðŸš¨ EÄžER EKRAN BOÅž KALIRSA ARTIK SEBEBÄ°NÄ° SANA SÃ–YLEYECEK:
+            await DisplayAlert("Gizli Hata YakalandÄ±", $"Veriler yÃ¼klenirken arka planda ÅŸu sorun Ã§Ä±ktÄ±:\n{ex.Message}", "Tamam");
+        }
     }
 }

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Kafeson.Shared.Models;assembly=Kafeson.Shared"
              x:Class="KafesonApp.YeniUrunKayitView">
 
-    <Grid RowDefinitions="Auto, Auto, *" Padding="20" RowSpacing="15">
+    <Grid RowDefinitions="Auto, Auto, Auto, *" Padding="20" RowSpacing="15">
 
         <VerticalStackLayout Grid.Row="0" Spacing="10">
             <Label Text="Ürün Yönetimi" FontSize="28" FontAttributes="Bold" TextColor="#2C3E50"/>
@@ -15,43 +16,28 @@
             </ScrollView>
         </VerticalStackLayout>
 
-        <Frame Grid.Row="1" CornerRadius="15" HasShadow="True" BorderColor="#DCDDE1" Padding="15">
-            <StackLayout Orientation="{OnIdiom Phone='Vertical', Desktop='Horizontal'}" 
-                         Spacing="10" 
-                         HorizontalOptions="{OnIdiom Phone='Fill', Desktop='Center'}">
-
-                <Entry x:Name="UrunAdEntry" 
-                       Placeholder="Ürün Adı" 
-                       WidthRequest="{OnIdiom Phone='-1', Desktop='200'}"/>
-
-                <Entry x:Name="UrunFiyatEntry" 
-                       Placeholder="Fiyat" 
-                       Keyboard="Numeric" 
-                       WidthRequest="{OnIdiom Phone='-1', Desktop='100'}"/>
-
-                <Button Text="+ Ürün Ekle" Clicked="OnUrunEkleClicked"
-                        BackgroundColor="#E67E22" 
-                        TextColor="White" 
-                        CornerRadius="10"
-                        HeightRequest="50"/>
+        <Frame Grid.Row="1" CornerRadius="15" HasShadow="True" BorderColor="#DCDDE1" Padding="15" BackgroundColor="#F8F9FA">
+            <StackLayout Orientation="{OnIdiom Phone='Vertical', Desktop='Horizontal'}" Spacing="10">
+                <Entry x:Name="UrunAdEntry" Placeholder="Ürün Adı" TextColor="Black" BackgroundColor="White" WidthRequest="{OnIdiom Phone='-1', Desktop='250'}"/>
+                <Entry x:Name="UrunFiyatEntry" Placeholder="Fiyat" Keyboard="Numeric" TextColor="Black" BackgroundColor="White" WidthRequest="{OnIdiom Phone='-1', Desktop='100'}"/>
+                <Button Text="+ Ürün Ekle" Clicked="OnUrunEkleClicked" BackgroundColor="#E67E22" TextColor="White" CornerRadius="10" HeightRequest="50"/>
             </StackLayout>
         </Frame>
 
-        <CollectionView Grid.Row="2" x:Name="FiltreliUrunList">
-            <CollectionView.Header>
-                <Label x:Name="ListeBaslikLabel" Text="Ürün Listesi" FontAttributes="Bold" Margin="0,10"/>
-            </CollectionView.Header>
+        <HorizontalStackLayout Grid.Row="2" HorizontalOptions="End">
+            <Button x:Name="BtnKategoriSil" Text="🗑 Seçili Kategoriyi Sil" IsVisible="False"
+                    BackgroundColor="#E74C3C" TextColor="White" CornerRadius="10" 
+                    Clicked="OnKategoriSilClicked"/>
+        </HorizontalStackLayout>
+
+        <CollectionView Grid.Row="3" x:Name="FiltreliUrunList">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Margin="0,5" Padding="10" BorderColor="#DCDDE1">
+                <DataTemplate x:DataType="models:Urun">
+                    <Frame Margin="0,5" Padding="10" BorderColor="#DCDDE1" BackgroundColor="White">
                         <Grid ColumnDefinitions="*, Auto, Auto">
-                            <Label Text="{Binding Ad}" VerticalOptions="Center"/>
-
-                            <Label Grid.Column="1" Text="{Binding Fiyat, StringFormat='{0:N2} TL'}" 
-                                   Margin="10,0" FontAttributes="Bold" TextColor="Green" VerticalOptions="Center"/>
-
-                            <Button Grid.Column="2" Text="🗑" BackgroundColor="Transparent" TextColor="Red"
-                                   FontSize="20" Clicked="OnUrunSilClicked" CommandParameter="{Binding .}"/>
+                            <Label Text="{Binding Ad}" VerticalOptions="Center" TextColor="Black" FontAttributes="Bold"/>
+                            <Label Grid.Column="1" Text="{Binding Fiyat, StringFormat='{0:N2} TL'}" Margin="10,0" FontAttributes="Bold" TextColor="Green" VerticalOptions="Center"/>
+                            <Button Grid.Column="2" Text="🗑" BackgroundColor="Transparent" TextColor="Red" Clicked="OnUrunSilClicked" CommandParameter="{Binding .}"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>

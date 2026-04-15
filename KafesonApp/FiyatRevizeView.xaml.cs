@@ -1,56 +1,36 @@
-using KafesonApp.Models;
+ï»¿using Kafeson.Shared.Models; // DÃœZELTÄ°LDÄ°
+using KafesonApp.Data;
 
 namespace KafesonApp;
 
 public partial class FiyatRevizeView : ContentView
 {
+    private readonly VeriServisi _servis = new VeriServisi();
+
     public FiyatRevizeView()
     {
         InitializeComponent();
-        KatMenusuOlustur();
+        UrunListesi.ItemsSource = App.Urunler;
     }
 
-    private void KatMenusuOlustur()
+    private async void Guncelle_Clicked(object sender, EventArgs e)
     {
-        KatMenuStack.Children.Clear();
-        var kategoriler = App.Urunler.Select(u => u.Kategori).Distinct().ToList();
-
-        foreach (var kat in kategoriler)
+        if (sender is Button btn && btn.CommandParameter is Urun urun)
         {
-            var btn = new Button
+            string sonuc = await Application.Current.MainPage.DisplayPromptAsync("Fiyat GÃ¼ncelle", $"{urun.Ad} iÃ§in yeni fiyat:", initialValue: urun.Fiyat.ToString());
+
+            if (double.TryParse(sonuc, out double yeniFiyat))
             {
-                Text = kat,
-                CornerRadius = 20,
-                BackgroundColor = Color.FromArgb("#F1F2F6"),
-                TextColor = Color.FromArgb("#2F3640"),
-                Padding = new Thickness(15, 0)
-            };
-            btn.Clicked += (s, e) => ÜrünleriFiltrele(kat, btn);
-            KatMenuStack.Children.Add(btn);
+                if (await _servis.FiyatGuncelle(urun.Id, yeniFiyat))
+                {
+                    urun.Fiyat = yeniFiyat;
+                    await Application.Current.MainPage.DisplayAlert("BaÅŸarÄ±lÄ±", "Fiyat gÃ¼ncellendi.", "Tamam");
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("Hata", "BaÄŸlantÄ± hatasÄ±.", "Tamam");
+                }
+            }
         }
-    }
-
-    private void ÜrünleriFiltrele(string kategori, Button secilenBtn)
-    {
-        // Buton renklerini sýfýrla
-        foreach (var child in KatMenuStack.Children)
-            if (child is Button b) { b.BackgroundColor = Color.FromArgb("#F1F2F6"); b.TextColor = Color.FromArgb("#2F3640"); }
-
-        // Seçileni vurgula
-        secilenBtn.BackgroundColor = Color.FromArgb("#FFC300");
-
-        // Listeyi filtrele
-        FiyatListeView.ItemsSource = App.Urunler.Where(u => u.Kategori == kategori).ToList();
-    }
-
-    private async void OnFiyatGuncelleClicked(object sender, EventArgs e)
-    {
-        var btn = (Button)sender;
-        var urun = (Urun)btn.CommandParameter;
-
-        // Fiyat güncellendi, JSON'a kaydet
-        App.VerileriKaydet();
-
-        await Application.Current.MainPage.DisplayAlert("Baþarýlý", $"{urun.Ad} fiyatý güncellendi.", "Tamam");
     }
 }

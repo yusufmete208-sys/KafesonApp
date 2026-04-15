@@ -1,37 +1,28 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Kafeson.Shared.Models;assembly=Kafeson.Shared"
              x:Class="KafesonApp.FiyatRevizeView">
 
-    <Grid RowDefinitions="Auto, *" Padding="20" RowSpacing="15">
+    <Grid RowDefinitions="Auto, Auto, *" Padding="15" RowSpacing="10">
 
-        <ScrollView Grid.Row="0" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-            <HorizontalStackLayout x:Name="KatMenuStack" Spacing="10">
-            </HorizontalStackLayout>
-        </ScrollView>
+        <Label Grid.Row="0" Text="FİYAT GÜNCELLEME" FontAttributes="Bold" FontSize="18" TextColor="#2C3E50" HorizontalOptions="Center"/>
+        <Label Grid.Row="1" Text="Fiyatını değiştirmek istediğiniz ürüne tıklayın." FontSize="12" TextColor="Gray" HorizontalOptions="Center"/>
 
-        <CollectionView Grid.Row="1" x:Name="FiyatListeView">
+        <CollectionView Grid.Row="2" x:Name="UrunListesi">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Margin="0,5" Padding="10" BorderColor="#DCDDE1">
-                        <Grid ColumnDefinitions="*, 120, Auto">
-                            <Label Text="{Binding Ad}" VerticalOptions="Center" FontAttributes="Bold"/>
+                <DataTemplate x:DataType="models:Urun">
+                    <Border BackgroundColor="White" Padding="10" Margin="0,0,0,8" Stroke="#BDC3C7" StrokeShape="RoundRectangle 8">
+                        <Grid ColumnDefinitions="*, Auto, Auto">
+                            <Label Text="{Binding Ad}" FontAttributes="Bold" TextColor="#2C3E50" VerticalOptions="Center"/>
 
-                            <Entry Grid.Column="1" 
-                                   Text="{Binding Fiyat, Mode=TwoWay}" 
-                                   Keyboard="Numeric" 
-                                   HorizontalTextAlignment="Center"
-                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{Binding Fiyat, StringFormat='{0:N2} ₺'}" 
+                                   TextColor="#27AE60" FontAttributes="Bold" VerticalOptions="Center" Margin="10,0"/>
 
-                            <Button Grid.Column="2" 
-                                    Text="GÜNCELLE" 
-                                    Clicked="OnFiyatGuncelleClicked"
-                                    CommandParameter="{Binding .}"
-                                    BackgroundColor="#9B59B6" 
-                                    TextColor="White" 
-                                    Margin="10,0,0,0"/>
+                            <Button Grid.Column="2" Text="DÜZENLE" Clicked="Guncelle_Clicked" CommandParameter="{Binding .}" 
+                                    BackgroundColor="#3498DB" TextColor="White" FontSize="12" HeightRequest="35" CornerRadius="5"/>
                         </Grid>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

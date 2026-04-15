@@ -1,53 +1,220 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:KafesonApp.Models"
-             x:Class="KafesonApp.MutfakPage"
-             Title="Mutfak / Hazırlanacaklar"
-             BackgroundColor="#2C3E50">
-    <Grid RowDefinitions="Auto, *">
+             xmlns:models="clr-namespace:Kafeson.Shared.Models;assembly=Kafeson.Shared"
+             x:Class="KafesonApp.Views.MutfakPage"
+             Title=""
+             BackgroundColor="#F4F6FB"
+             NavigationPage.HasNavigationBar="False">
+    <Grid RowDefinitions="Auto, Auto, *">
+      
 
-        <Grid Grid.Row="0" BackgroundColor="#E67E22" Padding="15" ColumnDefinitions="*, Auto">
-            <Label Text="HAZIRLANACAK SİPARİŞLER" TextColor="White" FontSize="20" FontAttributes="Bold" VerticalOptions="Center"/>
-            <Button Grid.Column="1" Text="Yenile" Clicked="Yenile_Clicked" BackgroundColor="Transparent" TextColor="White" BorderColor="White" BorderWidth="1" HeightRequest="35"/>
+        
+
+        <!-- ══════════════════════════════════
+             HEADER
+        ══════════════════════════════════ -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto, *, Auto"
+              Padding="20,52,20,16"
+              BackgroundColor="White">
+            <Grid.Shadow>
+                <Shadow Brush="#CBD5E1" Offset="0,4" Radius="16" Opacity="0.2"/>
+            </Grid.Shadow>
+
+            <Border Grid.Column="0"
+                    BackgroundColor="#F1F5F9"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    WidthRequest="42"
+                    HeightRequest="42"
+                    VerticalOptions="Center"
+                    Margin="0,0,15,0">
+                <Button Text="❮"
+                        Clicked="Geri_Clicked"
+                        BackgroundColor="Transparent"
+                        TextColor="#475569"
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        Padding="0"/>
+            </Border>
+
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                <Label Text="MUTFAK EKRANI"
+                       FontSize="10" FontAttributes="Bold"
+                       TextColor="#E67E22" CharacterSpacing="4"/>
+                <Label Text="Hazırlanacaklar"
+                       FontSize="26" FontAttributes="Bold"
+                       TextColor="#0F172A"/>
+            </VerticalStackLayout>
+
+            <Border Grid.Column="2"
+                    BackgroundColor="#FFF7ED"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0"
+                    Padding="14,10"
+                    VerticalOptions="Center">
+                <Button Text="⟳  Yenile"
+                        Clicked="Yenile_Clicked"
+                        BackgroundColor="Transparent"
+                        TextColor="#E67E22"
+                        FontAttributes="Bold"
+                        FontSize="13"
+                        Padding="0"/>
+            </Border>
         </Grid>
 
-        <CollectionView Grid.Row="1" x:Name="MutfakListesiView" Margin="10">
+        <!-- ══════════════════════════════════
+             CANLI DURUM ŞERİDİ
+        ══════════════════════════════════ -->
+        <Border Grid.Row="1"
+                BackgroundColor="White"
+                Margin="16,14,16,0"
+                Padding="16,12"
+                StrokeShape="RoundRectangle 16"
+                StrokeThickness="0">
+            <Border.Shadow>
+                <Shadow Brush="#CBD5E1" Offset="0,4" Radius="14" Opacity="0.18"/>
+            </Border.Shadow>
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Ellipse WidthRequest="8" HeightRequest="8" Fill="#E67E22"/>
+                    <Label Text="CANLI" FontSize="10" FontAttributes="Bold"
+                           TextColor="#E67E22" CharacterSpacing="2" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+                <Label Grid.Column="1"
+                       Text="Mutfak aktif — siparişler izleniyor"
+                       FontSize="12" TextColor="#94A3B8"
+                       VerticalOptions="Center" HorizontalOptions="Center"/>
+                <Label Grid.Column="2" Text="🍳" FontSize="16" VerticalOptions="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ══════════════════════════════════
+             SİPARİŞ LİSTESİ
+        ══════════════════════════════════ -->
+        <CollectionView Grid.Row="2"
+                        x:Name="MutfakListesiView"
+                        Margin="16,14,16,24">
+
             <CollectionView.EmptyView>
-                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
-                    <Label Text="☕" FontSize="60" HorizontalOptions="Center"/>
-                    <Label Text="Bekleyen sipariş yok. Mutfak rahat!" TextColor="#BDC3C7" FontSize="18"/>
+                <VerticalStackLayout HorizontalOptions="Center"
+                                     VerticalOptions="Center"
+                                     Spacing="14" Padding="40">
+                    <Border BackgroundColor="#FFF7ED"
+                            StrokeShape="RoundRectangle 30"
+                            StrokeThickness="0"
+                            WidthRequest="100" HeightRequest="100"
+                            HorizontalOptions="Center">
+                        <Border.Shadow>
+                            <Shadow Brush="#E67E22" Offset="0,0" Radius="20" Opacity="0.1"/>
+                        </Border.Shadow>
+                        <Label Text="☕" FontSize="48"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <Label Text="Mutfak şu an rahat!"
+                           FontSize="20" FontAttributes="Bold"
+                           TextColor="#0F172A" HorizontalTextAlignment="Center"/>
+                    <Label Text="Bekleyen sipariş bulunmuyor."
+                           FontSize="14" TextColor="#94A3B8"
+                           HorizontalTextAlignment="Center"/>
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
 
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="{OnIdiom Phone='1', Desktop='3'}" HorizontalItemSpacing="10" VerticalItemSpacing="10"/>
-            </CollectionView.ItemsLayout>
-
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:MutfakSiparisi">
-                    <Border BackgroundColor="#ECF0F1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15">
-                        <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Border BackgroundColor="White"
+                            StrokeShape="RoundRectangle 20"
+                            StrokeThickness="0"
+                            Margin="0,0,0,12"
+                            Padding="0">
+                        <Border.Shadow>
+                            <Shadow Brush="#CBD5E1" Offset="0,4" Radius="16" Opacity="0.18"/>
+                        </Border.Shadow>
 
-                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" BackgroundColor="#34495E" Padding="10" WidthRequest="70">
-                                <Label Text="{Binding MasaNo, StringFormat='MASA {0}'}" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" FontSize="12"/>
-                                <Label Text="{Binding SaatMetni}" TextColor="#F1C40F" FontAttributes="Bold" HorizontalOptions="Center" FontSize="14"/>
-                            </VerticalStackLayout>
+                        <Grid RowDefinitions="Auto, Auto">
 
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="15,0">
-                                <Label Text="{Binding Miktar, StringFormat='{0} ADET'}" TextColor="#E74C3C" FontAttributes="Bold" FontSize="16"/>
-                                <Label Text="{Binding UrunAd}" TextColor="#2C3E50" FontAttributes="Bold" FontSize="20" LineBreakMode="WordWrap"/>
-                            </VerticalStackLayout>
+                            <!-- Üst şerit: Masa + Saat -->
+                            <Grid Grid.Row="0"
+                                  ColumnDefinitions="Auto, *, Auto"
+                                  BackgroundColor="#F8FAFC"
+                                  Padding="14,10">
 
-                            <Button Grid.Column="2" Text="HAZIR ✓" 
-                                    Clicked="Hazir_Clicked" CommandParameter="{Binding .}" 
-                                    BackgroundColor="#27AE60" TextColor="White" 
-                                    FontAttributes="Bold" WidthRequest="90" HeightRequest="50" 
-                                    CornerRadius="8" VerticalOptions="Center"/>
+                                <Border BackgroundColor="#E67E22"
+                                        StrokeShape="RoundRectangle 10"
+                                        StrokeThickness="0"
+                                        Padding="10,6"
+                                        VerticalOptions="Center">
+                                    <Border.Shadow>
+                                        <Shadow Brush="#E67E22" Offset="0,2" Radius="8" Opacity="0.3"/>
+                                    </Border.Shadow>
+                                    <Label Text="{Binding MasaNo, StringFormat='MASA {0}'}"
+                                           FontSize="12" FontAttributes="Bold"
+                                           TextColor="White" CharacterSpacing="1"/>
+                                </Border>
+
+                                <BoxView Grid.Column="1" Color="Transparent"/>
+
+                                <HorizontalStackLayout Grid.Column="2"
+                                                       Spacing="6" VerticalOptions="Center">
+                                    <Label Text="🕐" FontSize="13" VerticalOptions="Center"/>
+                                    <Label Text="{Binding SaatMetni}"
+                                           FontSize="14" FontAttributes="Bold"
+                                           TextColor="#F59E0B" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Grid>
+
+                            <!-- Alt: Ürün + HAZIR butonu -->
+                            <Grid Grid.Row="1"
+                                  ColumnDefinitions="*, Auto"
+                                  Padding="16,14"
+                                  ColumnSpacing="12">
+
+                                <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
+                                    <Border BackgroundColor="#FFF7ED"
+                                            StrokeShape="RoundRectangle 6"
+                                            StrokeThickness="0"
+                                            Padding="8,3"
+                                            HorizontalOptions="Start">
+                                        <Label Text="{Binding Miktar, StringFormat='× {0}'}"
+                                               FontSize="12" FontAttributes="Bold"
+                                               TextColor="#EA580C"/>
+                                    </Border>
+                                    <Label Text="{Binding UrunAd}"
+                                           FontSize="20" FontAttributes="Bold"
+                                           TextColor="#0F172A"
+                                           LineBreakMode="WordWrap" MaxLines="2"/>
+                                </VerticalStackLayout>
+
+                                <Border Grid.Column="1"
+                                        BackgroundColor="#F0FDF4"
+                                        StrokeShape="RoundRectangle 16"
+                                        Stroke="#86EFAC"
+                                        StrokeThickness="1.5"
+                                        Padding="0"
+                                        VerticalOptions="Center">
+                                    <Border.Shadow>
+                                        <Shadow Brush="#22C55E" Offset="0,3" Radius="10" Opacity="0.15"/>
+                                    </Border.Shadow>
+                                    <Button Text="✓ HAZIR"
+                                            Clicked="Hazir_Clicked"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#16A34A"
+                                            FontAttributes="Bold"
+                                            FontSize="13"
+                                            CharacterSpacing="1"
+                                            WidthRequest="90"
+                                            HeightRequest="52"
+                                            Padding="0"/>
+                                </Border>
+                            </Grid>
+
                         </Grid>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
     </Grid>
 </ContentPage>

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:KafesonApp.Models"
-             x:Class="KafesonApp.MasaYonetimView">
+             
+             xmlns:models="clr-namespace:Kafeson.Shared.Models;assembly=Kafeson.Shared"
+             
+             x:Class="KafesonApp.Views.MasaYonetimView">
+
     <VerticalStackLayout Padding="15" Spacing="20">
 
         <Border BackgroundColor="White" StrokeThickness="0" Padding="20">
@@ -39,7 +42,7 @@
 
         <Border BackgroundColor="#0F172A" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="4">
             <Grid ColumnDefinitions="*, *">
-                <Button x:Name="BtnFiltreIcMekan" Text="🏠 İÇ MEKAN" Clicked="Filtrele_Clicked" CommandParameter="İç Mekan"
+                <Button Grid.Column="0" x:Name="BtnFiltreIcMekan" Text="🏠 İÇ MEKAN" Clicked="Filtrele_Clicked" CommandParameter="İç Mekan"
                         BackgroundColor="#3B82F6" TextColor="White" HeightRequest="45" CornerRadius="10" FontAttributes="Bold"/>
 
                 <Button Grid.Column="1" x:Name="BtnFiltreBahce" Text="🌳 BAHÇE" Clicked="Filtrele_Clicked" CommandParameter="Bahçe"

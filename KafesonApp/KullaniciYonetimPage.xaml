@@ -1,122 +1,140 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:models="clr-namespace:KafesonApp.Models"
+             xmlns:models="clr-namespace:Kafeson.Shared.Models;assembly=Kafeson.Shared"
              x:Class="KafesonApp.KullaniciYonetimPage"
-             Title="Personel Kontrol"
-             BackgroundColor="#F0F4F8">
+             x:Name="thisPage"
+             BackgroundColor="#F8FAFC">
 
-    <Grid RowDefinitions="Auto, *" Padding="20" RowSpacing="20">
+    <Grid RowDefinitions="Auto, Auto, *">
 
-        <Grid Grid.Row="0">
-
-            <Border x:Name="YeniPersonelFormu" BackgroundColor="White" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="20">
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="20,50,20,16" BackgroundColor="White">
+            <VerticalStackLayout VerticalOptions="Center">
+                <Label Text="PERSONEL" FontSize="11" TextColor="#F97316" FontAttributes="Bold" CharacterSpacing="4"/>
+                <Label Text="Yönetim Paneli" FontSize="26" TextColor="#1E293B" FontAttributes="Bold"/>
+            </VerticalStackLayout>
+            <Border Grid.Column="1" BackgroundColor="#F1F5F9" 
+                    StrokeShape="RoundRectangle 14" StrokeThickness="0"
+                    Padding="14,10" VerticalOptions="Center">
                 <Border.Shadow>
-                    <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.05"/>
+                    <Shadow Brush="#F97316" Offset="0,0" Radius="8" Opacity="0.1"/>
                 </Border.Shadow>
-
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="➕ Yeni Personel Ekle" FontSize="18" FontAttributes="Bold" TextColor="#2C3E50"/>
-
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
-                        <Border Grid.Column="0" BackgroundColor="#F8F9FA" StrokeThickness="1" Stroke="#E2E8F0" StrokeShape="RoundRectangle 8">
-                            <Entry x:Name="YeniKadiEntry" Placeholder="Kullanıcı Adı" Margin="10,0" TextColor="#2C3E50"/>
-                        </Border>
-                        <Border Grid.Column="1" BackgroundColor="#F8F9FA" StrokeThickness="1" Stroke="#E2E8F0" StrokeShape="RoundRectangle 8">
-                            <Entry x:Name="YeniSifreEntry" Placeholder="Şifre Belirle" Margin="10,0" TextColor="#2C3E50"/>
-                        </Border>
-                    </Grid>
-
-                    <Label Text="Personel Yetkileri:" TextColor="#7F8C8D" FontSize="12" Margin="0,5,0,0"/>
-                    <FlexLayout Wrap="Wrap" JustifyContent="SpaceBetween" AlignItems="Center">
-                        <HorizontalStackLayout Spacing="5" Margin="0,0,15,0">
-                            <CheckBox x:Name="ChkMasa" IsChecked="True" Color="#27AE60"/>
-                            <Label Text="Sipariş Alabilir" VerticalOptions="Center" TextColor="#2C3E50"/>
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout Spacing="5" Margin="0,0,15,0">
-                            <CheckBox x:Name="ChkRapor" Color="#27AE60"/>
-                            <Label Text="Rapor Görebilir" VerticalOptions="Center" TextColor="#2C3E50"/>
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout Spacing="5">
-                            <CheckBox x:Name="ChkAyarlar" Color="#27AE60"/>
-                            <Label Text="Yönetici (Tam Yetki)" VerticalOptions="Center" TextColor="#2C3E50"/>
-                        </HorizontalStackLayout>
-                    </FlexLayout>
-
-                    <Button Text="Kaydet ve Sisteme Ekle" Clicked="PersonelEkle_Clicked" BackgroundColor="#3498DB" TextColor="White" FontAttributes="Bold" CornerRadius="8" HeightRequest="45" Margin="0,10,0,0"/>
-                </VerticalStackLayout>
-            </Border>
-
-            <Border x:Name="PerformansPaneli" IsVisible="False" BackgroundColor="#1E293B" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="20">
-                <Border.Shadow>
-                    <Shadow Brush="Black" Offset="0,6" Radius="15" Opacity="0.2"/>
-                </Border.Shadow>
-
-                <VerticalStackLayout Spacing="15">
-                    <Grid ColumnDefinitions="*, Auto">
-                        <Label x:Name="PerfKullaniciLabel" Text="PERSONEL PERFORMANSI" FontSize="18" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
-                        <Button Grid.Column="1" Text="✖ Kapat" Clicked="PerformansKapat_Clicked" BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" CornerRadius="8" HeightRequest="35" Padding="15,0"/>
-                    </Grid>
-
-                    <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
-                        <Border Grid.Column="0" BackgroundColor="#334155" StrokeThickness="0" Padding="10" StrokeShape="RoundRectangle 10">
-                            <VerticalStackLayout Spacing="5">
-                                <Label Text="TOPLAM CİRO" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
-                                <Label x:Name="PerfCiroLabel" Text="0.00 ₺" FontSize="18" FontAttributes="Bold" TextColor="#10B981" HorizontalOptions="Center"/>
-                            </VerticalStackLayout>
-                        </Border>
-                        <Border Grid.Column="1" BackgroundColor="#334155" StrokeThickness="0" Padding="10" StrokeShape="RoundRectangle 10">
-                            <VerticalStackLayout Spacing="5">
-                                <Label Text="İŞLEM" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
-                                <Label x:Name="PerfIslemLabel" Text="0" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
-                            </VerticalStackLayout>
-                        </Border>
-                        <Border Grid.Column="2" BackgroundColor="#334155" StrokeThickness="0" Padding="10" StrokeShape="RoundRectangle 10">
-                            <VerticalStackLayout Spacing="5">
-                                <Label Text="ORT. SEPET" FontSize="10" TextColor="#94A3B8" HorizontalOptions="Center"/>
-                                <Label x:Name="PerfOrtalamaLabel" Text="0.00 ₺" FontSize="18" FontAttributes="Bold" TextColor="#F59E0B" HorizontalOptions="Center"/>
-                            </VerticalStackLayout>
-                        </Border>
-                    </Grid>
-
-                    <Label Text="Son İşlemleri:" TextColor="#94A3B8" FontSize="12" Margin="0,5,0,0"/>
-                    <CollectionView x:Name="PerfIslemlerListesi" HeightRequest="120">
-                        <CollectionView.EmptyView>
-                            <Label Text="Kayıtlı satışı yok." TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        </CollectionView.EmptyView>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:SatisRaporu">
-                                <Grid ColumnDefinitions="*, Auto, Auto" Padding="5,10" BackgroundColor="#0F172A" Margin="0,0,0,5">
-                                    <Label Grid.Column="0" Text="{Binding MasaNo, StringFormat='Masa {0}'}" TextColor="White" FontAttributes="Bold" VerticalOptions="Center"/>
-                                    <Label Grid.Column="1" Text="{Binding Tarih, StringFormat='{0:HH:mm}'}" TextColor="#94A3B8" Margin="0,0,15,0" VerticalOptions="Center"/>
-                                    <Label Grid.Column="2" Text="{Binding Tutar, StringFormat='{0:N2} ₺'}" TextColor="#10B981" FontAttributes="Bold" VerticalOptions="Center"/>
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
-                </VerticalStackLayout>
+                <Label Text="☕" FontSize="20" VerticalOptions="Center"/>
             </Border>
         </Grid>
 
-        <CollectionView Grid.Row="1" x:Name="PersonelListesiView">
+        <Border Grid.Row="1" BackgroundColor="White" Margin="16,10,16,12" Padding="20,18" StrokeShape="RoundRectangle 20" Stroke="#E2E8F0" StrokeThickness="1">
+            <Border.Shadow>
+                <Shadow Brush="Black" Offset="0,4" Radius="15" Opacity="0.05"/>
+            </Border.Shadow>
+
+            <VerticalStackLayout Spacing="14">
+                <HorizontalStackLayout Spacing="10" Margin="0,0,0,4">
+                    <Border BackgroundColor="#F97316" WidthRequest="4" HeightRequest="22" StrokeShape="RoundRectangle 2" StrokeThickness="0"/>
+                    <Label Text="Personel Ekle / Düzenle" FontSize="15" FontAttributes="Bold" TextColor="#1E293B" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                    <Border BackgroundColor="#F8FAFC" StrokeShape="RoundRectangle 12" Stroke="#E2E8F0" StrokeThickness="1" Padding="14,0">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                            <Label Text="👤" FontSize="14" VerticalOptions="Center"/>
+                            <Entry x:Name="KullaniciAdiEntry" Grid.Column="1" Placeholder="Kullanıcı Adı" PlaceholderColor="#94A3B8" TextColor="#1E293B" BackgroundColor="Transparent" HeightRequest="48" FontSize="13"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1" BackgroundColor="#F8FAFC" StrokeShape="RoundRectangle 12" Stroke="#E2E8F0" StrokeThickness="1" Padding="14,0">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                            <Label Text="🔑" FontSize="14" VerticalOptions="Center"/>
+                            <Entry x:Name="SifreEntry" Grid.Column="1" Placeholder="Şifre" PlaceholderColor="#94A3B8" IsPassword="True" TextColor="#1E293B" BackgroundColor="Transparent" HeightRequest="48" FontSize="13"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Label Text="YETKİ TANIMLAMALARI" FontSize="10" TextColor="#94A3B8" FontAttributes="Bold" CharacterSpacing="2" Margin="0,4,0,0"/>
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <Border BackgroundColor="#F1F5F9" StrokeShape="RoundRectangle 14" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,10">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="🪑" FontSize="20" HorizontalOptions="Center"/>
+                            <Label Text="Masa" FontSize="11" FontAttributes="Bold" TextColor="#64748B" HorizontalOptions="Center"/>
+                            <Switch x:Name="MasaYetkisiSwitch" IsToggled="True" HorizontalOptions="Center" Scale="0.75" OnColor="#F97316" ThumbColor="White"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Grid.Column="1" BackgroundColor="#F1F5F9" StrokeShape="RoundRectangle 14" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,10">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="📊" FontSize="20" HorizontalOptions="Center"/>
+                            <Label Text="Rapor" FontSize="11" FontAttributes="Bold" TextColor="#64748B" HorizontalOptions="Center"/>
+                            <Switch x:Name="RaporYetkisiSwitch" HorizontalOptions="Center" Scale="0.75" OnColor="#F97316" ThumbColor="White"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Grid.Column="2" BackgroundColor="#F1F5F9" StrokeShape="RoundRectangle 14" Stroke="#E2E8F0" StrokeThickness="1" Padding="12,10">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="⚙️" FontSize="20" HorizontalOptions="Center"/>
+                            <Label Text="Ayarlar" FontSize="11" FontAttributes="Bold" TextColor="#64748B" HorizontalOptions="Center"/>
+                            <Switch x:Name="AyarlarYetkisiSwitch" HorizontalOptions="Center" Scale="0.75" OnColor="#F97316" ThumbColor="White"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border BackgroundColor="#F97316" StrokeShape="RoundRectangle 14" StrokeThickness="0" Margin="0,4,0,0">
+                    <Border.Shadow>
+                        <Shadow Brush="#F97316" Offset="0,4" Radius="10" Opacity="0.3"/>
+                    </Border.Shadow>
+                    <Button x:Name="BtnEkle" Text="＋  PERSONELİ SİSTEME EKLE" Clicked="Ekle_Clicked" BackgroundColor="Transparent" TextColor="White" FontAttributes="Bold" FontSize="13" CharacterSpacing="1" HeightRequest="50"/>
+                </Border>
+            </VerticalStackLayout>
+        </Border>
+
+        <CollectionView Grid.Row="2" x:Name="ListeView" Margin="16,0,16,20">
             <CollectionView.Header>
-                <Label Text="Kayıtlı Personeller" FontAttributes="Bold" TextColor="#7F8C8D" Margin="0,0,0,10"/>
+                <HorizontalStackLayout Spacing="8" Margin="2,0,0,12">
+                    <Label Text="Kayıtlı Personeller" FontSize="13" FontAttributes="Bold" TextColor="#64748B" VerticalOptions="Center"/>
+                    <Border BackgroundColor="#F1F5F9" StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="8,2">
+                        <Label Text="{Binding PersonelListesi.Count, Source={Reference thisPage}}" FontSize="11" TextColor="#F97316" FontAttributes="Bold"/>
+                    </Border>
+                </HorizontalStackLayout>
             </CollectionView.Header>
+
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Kullanici">
-                    <Border BackgroundColor="White" StrokeShape="RoundRectangle 10" StrokeThickness="0" Padding="15" Margin="0,0,0,10">
-                        <Grid ColumnDefinitions="*, Auto, Auto">
-                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                                <Label Text="{Binding KullaniciAdi}" FontAttributes="Bold" FontSize="16" TextColor="#2C3E50"/>
-                                <Label Text="{Binding Sifre, StringFormat='Şifre: {0}'}" FontSize="12" TextColor="#95A5A6"/>
+                    <Border BackgroundColor="White" Margin="0,0,0,10" Padding="16,14" StrokeShape="RoundRectangle 16" Stroke="#E2E8F0" StrokeThickness="1">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,2" Radius="6" Opacity="0.05"/>
+                        </Border.Shadow>
+
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                            <Border BackgroundColor="#F97316" WidthRequest="44" HeightRequest="44" StrokeShape="RoundRectangle 12" StrokeThickness="0" VerticalOptions="Center">
+                                <Label Text="👤" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                                <Label Text="{Binding KullaniciAdi}" FontSize="15" FontAttributes="Bold" TextColor="#1E293B"/>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Border IsVisible="{Binding MasaYetkisi}" BackgroundColor="#FFEDD5" Padding="8,3" StrokeShape="RoundRectangle 6" StrokeThickness="0">
+                                        <Label Text="Masa" FontSize="10" FontAttributes="Bold" TextColor="#9A3412"/>
+                                    </Border>
+                                    <Border IsVisible="{Binding RaporYetkisi}" BackgroundColor="#DCFCE7" Padding="8,3" StrokeShape="RoundRectangle 6" StrokeThickness="0">
+                                        <Label Text="Rapor" FontSize="10" FontAttributes="Bold" TextColor="#166534"/>
+                                    </Border>
+                                    <Border IsVisible="{Binding AyarlarYetkisi}" BackgroundColor="#DBEAFE" Padding="8,3" StrokeShape="RoundRectangle 6" StrokeThickness="0">
+                                        <Label Text="Ayar" FontSize="10" FontAttributes="Bold" TextColor="#1E40AF"/>
+                                    </Border>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
 
-                            <Button Grid.Column="1" Text="📊 Performans" Clicked="PersonelPerformans_Clicked" CommandParameter="{Binding .}" BackgroundColor="#10B981" TextColor="White" HeightRequest="35" Padding="15,0" CornerRadius="8" Margin="0,0,10,0" VerticalOptions="Center"/>
+                            <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center">
 
-                            <Button Grid.Column="2" Text="Sil" Clicked="PersonelSil_Clicked" CommandParameter="{Binding .}" BackgroundColor="#EF4444" TextColor="White" HeightRequest="35" Padding="15,0" CornerRadius="8" VerticalOptions="Center"/>
+                                <Border BackgroundColor="#EFF6FF" WidthRequest="42" HeightRequest="42" StrokeShape="RoundRectangle 12" Stroke="#93C5FD" StrokeThickness="1">
+                                    <Button Text="✏️" Clicked="Duzenle_Clicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="16" Padding="0" WidthRequest="42" HeightRequest="42"/>
+                                </Border>
+
+                                <Border BackgroundColor="#FEF2F2" WidthRequest="42" HeightRequest="42" StrokeShape="RoundRectangle 12" Stroke="#FCA5A5" StrokeThickness="1">
+                                    <Button Text="🗑" Clicked="Sil_Clicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#EF4444" FontSize="16" Padding="0" WidthRequest="42" HeightRequest="42"/>
+                                </Border>
+
+                            </HorizontalStackLayout>
                         </Grid>
                     </Border>
                 </DataTemplate>

@@ -1,153 +1,110 @@
-﻿using KafesonApp.Models;
+﻿#nullable disable
+using Kafeson.Shared.Models;
+using KafesonApp.Data;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 
 namespace KafesonApp;
 
-public class OdemeUrunu : INotifyPropertyChanged
-{
-    public Urun OrijinalUrun { get; set; }
-    public string Ad => OrijinalUrun.Ad;
-    public double Fiyat => OrijinalUrun.Fiyat;
-    public int ToplamAdet => OrijinalUrun.Miktar;
-
-    private int _secilenAdet;
-    public int SecilenAdet
-    {
-        get => _secilenAdet;
-        set { _secilenAdet = value; OnPropertyChanged(nameof(SecilenAdet)); }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-}
-
 public partial class OdemePage : ContentPage
 {
-    private Masa _masa;
-    public ObservableCollection<OdemeUrunu> OdemeListesi { get; set; }
+    Masa _masa;
+    private readonly VeriServisi _servis = new VeriServisi();
+    private Entry _tutarEntry;
+    private bool _isUpdating = false;
 
     public OdemePage(Masa masa)
     {
         InitializeComponent();
+        _tutarEntry = this.FindByName<Entry>("OdenecekTutarEntry");
         _masa = masa;
+        BindingContext = _masa;
 
-        KalanLabel.Text = $"{_masa.KalanTutar:N2} ₺";
-
-        OdemeListesi = new ObservableCollection<OdemeUrunu>();
-        ListeyiDoldur();
-        UrunlerView.ItemsSource = OdemeListesi;
-    }
-
-    private void ListeyiDoldur()
-    {
-        OdemeListesi.Clear();
-        foreach (var urun in _masa.Siparisler)
+        if (_masa.Siparisler != null)
         {
-            OdemeListesi.Add(new OdemeUrunu { OrijinalUrun = urun, SecilenAdet = 0 });
-        }
-    }
-
-    private void Arti_Clicked(object sender, EventArgs e)
-    {
-        if (sender is Button btn && btn.CommandParameter is OdemeUrunu u)
-        {
-            if (u.SecilenAdet < u.ToplamAdet)
+            foreach (var urun in _masa.Siparisler)
             {
-                u.SecilenAdet++;
-                Hesapla();
+                urun.OdenecekAdet = 0;
+                urun.IsSecili = false;
+                urun.PropertyChanged += Urun_PropertyChanged;
             }
         }
+        TutarGuncelle();
     }
 
-    private void Eksi_Clicked(object sender, EventArgs e)
+    private void Urun_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (sender is Button btn && btn.CommandParameter is OdemeUrunu u)
+        if (_isUpdating) return;
+        if (sender is Urun urun)
         {
-            if (u.SecilenAdet > 0)
+            _isUpdating = true;
+            if (e.PropertyName == nameof(Urun.IsSecili))
             {
-                u.SecilenAdet--;
-                Hesapla();
+                if (urun.IsSecili && urun.OdenecekAdet == 0) urun.OdenecekAdet = urun.Miktar;
+                else if (!urun.IsSecili) urun.OdenecekAdet = 0;
+                TutarGuncelle();
+            }
+            else if (e.PropertyName == nameof(Urun.OdenecekAdet)) TutarGuncelle();
+            _isUpdating = false;
+        }
+    }
+
+    private void TutarGuncelle()
+    {
+        try
+        {
+            if (_masa.Siparisler == null || _tutarEntry == null) return;
+            double toplam = _masa.Siparisler.Where(x => x.OdenecekAdet > 0).Sum(x => x.OdenecekAdet * x.Fiyat);
+            _tutarEntry.Text = toplam > 0 ? toplam.ToString("N2") : _masa.KalanTutar.ToString("N2");
+        }
+        catch { }
+    }
+
+    private void OdenenMiktarArtir_Clicked(object sender, EventArgs e) { if (sender is Button btn && btn.CommandParameter is Urun urun && urun.OdenecekAdet < urun.Miktar) { urun.OdenecekAdet++; urun.IsSecili = true; } }
+    private void OdenenMiktarAzalt_Clicked(object sender, EventArgs e) { if (sender is Button btn && btn.CommandParameter is Urun urun && urun.OdenecekAdet > 0) { urun.OdenecekAdet--; if (urun.OdenecekAdet == 0) urun.IsSecili = false; } }
+
+    private async void OdemeYap_Clicked(object sender, EventArgs e)
+    {
+        string girilen = _tutarEntry?.Text?.Replace(",", ".");
+        if (!double.TryParse(girilen, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double tutar) || tutar <= 0) return;
+
+        var seciliUrunler = _masa.Siparisler.Where(x => x.OdenecekAdet > 0).ToList();
+        string tip = ((Button)sender).CommandParameter?.ToString() ?? "Nakit";
+
+        if (seciliUrunler.Any())
+        {
+            foreach (var urun in seciliUrunler)
+            {
+                if (_masa.KapanisUrunleri == null) _masa.KapanisUrunleri = new List<Urun>();
+                _masa.KapanisUrunleri.Add(new Urun { Ad = urun.Ad, Miktar = urun.OdenecekAdet, Fiyat = urun.Fiyat });
+                urun.Miktar -= urun.OdenecekAdet;
+                if (urun.Miktar <= 0) { urun.PropertyChanged -= Urun_PropertyChanged; _masa.Siparisler.Remove(urun); }
+                else { _isUpdating = true; urun.OdenecekAdet = 0; urun.IsSecili = false; _isUpdating = false; }
             }
         }
-    }
 
-    private void Hesapla()
-    {
-        double toplam = OdemeListesi.Sum(x => x.SecilenAdet * x.Fiyat);
-        SecilenTutarLabel.Text = $"{toplam:N2} ₺";
+        if (tip == "Nakit") _masa.NakitBirikim += tutar; else _masa.KartBirikim += tutar;
+        await _servis.LogGonder(_masa.No, "Ödeme Tahsil", $"{tutar:N2} ₺ {tip} ödendi.");
 
-        if (toplam > 0) AlinanTutarEntry.Text = "";
-    }
-
-    private void Nakit_Clicked(object sender, EventArgs e) => OdemeIsleminiYap("Nakit");
-    private void Kart_Clicked(object sender, EventArgs e) => OdemeIsleminiYap("Kart");
-
-    private async void OdemeIsleminiYap(string tur)
-    {
-        double secilenUrunTutari = OdemeListesi.Sum(x => x.SecilenAdet * x.Fiyat);
-        double islemTutari = 0;
-        bool urunBazliOdeme = false;
-
-        if (secilenUrunTutari > 0)
+        if ((_masa.KalanTutar - tutar) <= 0.01)
         {
-            islemTutari = secilenUrunTutari;
-            urunBazliOdeme = true;
-        }
-        else if (double.TryParse(AlinanTutarEntry.Text, out double manuelTutar))
-        {
-            islemTutari = manuelTutar;
-        }
-        else
-        {
-            await DisplayAlert("Uyarı", "Lütfen ödenecek ürünleri seçin veya bir tutar girin.", "Tamam");
-            return;
-        }
+            foreach (var kalanUrun in _masa.Siparisler.ToList()) { if (kalanUrun.Miktar > 0) _masa.KapanisUrunleri.Add(new Urun { Ad = kalanUrun.Ad, Miktar = kalanUrun.Miktar, Fiyat = kalanUrun.Fiyat }); }
 
-        if (islemTutari <= 0 || islemTutari > _masa.KalanTutar + 0.1)
-        {
-            await DisplayAlert("Hata", "Geçersiz veya kalan hesaptan fazla bir tutar girdiniz.", "Tamam");
-            return;
-        }
-
-        if (tur == "Nakit") _masa.NakitBirikim += islemTutari;
-        else _masa.KartBirikim += islemTutari;
-
-        if (urunBazliOdeme)
-        {
-            foreach (var odemeUrunu in OdemeListesi.Where(x => x.SecilenAdet > 0))
+            var rapor = new SatisRaporu
             {
-                var kapanisUrunu = _masa.KapanisUrunleri.FirstOrDefault(x => x.Ad == odemeUrunu.Ad);
-                if (kapanisUrunu != null) kapanisUrunu.Miktar += odemeUrunu.SecilenAdet;
-                else _masa.KapanisUrunleri.Add(new Urun { Ad = odemeUrunu.Ad, Fiyat = odemeUrunu.Fiyat, Miktar = odemeUrunu.SecilenAdet });
+                MasaNo = _masa.No,
+                Tutar = _masa.NakitBirikim + _masa.KartBirikim,
+                OdemeTuru = $"Nakit: {_masa.NakitBirikim:N2} / Kart: {_masa.KartBirikim:N2}",
+                Tarih = DateTime.Now,
+                UrunDetaylari = string.Join(", ", _masa.KapanisUrunleri.Where(x => x.Miktar > 0).GroupBy(x => x.Ad).Select(g => $"{g.Sum(x => x.Miktar)}x {g.Key}")),
+                PersonelAdi = App.AktifKullanici != null ? App.AktifKullanici.KullaniciAdi : "Admin"
+            };
 
-                var masaUrunu = _masa.Siparisler.FirstOrDefault(x => x.Ad == odemeUrunu.Ad);
-                if (masaUrunu != null)
-                {
-                    masaUrunu.Miktar -= odemeUrunu.SecilenAdet;
-                    if (masaUrunu.Miktar <= 0) _masa.Siparisler.Remove(masaUrunu);
-                }
-            }
+            await _servis.RaporGonder(rapor);
+            _masa.IsDolu = false; _masa.Siparisler.Clear();
+            await _servis.MasaGuncelle(_masa.No, _masa);
+            await Navigation.PopAsync();
         }
-        else
-        {
-            _masa.OdenmisTutar += islemTutari;
-        }
-
-        _masa.YenidenHesapla();
-        App.VerileriKaydet();
-
-        // 🟢 SİSTEME LOG EKLİYORUZ 🟢
-        App.LogEkle("Ödeme Alındı", $"Masa {_masa.No}'dan {islemTutari:N2} ₺ tutarında {tur} ödemesi alındı.");
-
-        await DisplayAlert("Başarılı", $"{islemTutari:N2} ₺ {tur} ödemesi alındı.", "Tamam");
-
-        KalanLabel.Text = $"{_masa.KalanTutar:N2} ₺";
-        AlinanTutarEntry.Text = "";
-        SecilenTutarLabel.Text = "0.00 ₺";
-        ListeyiDoldur();
+        else { await _servis.MasaGuncelle(_masa.No, _masa); TutarGuncelle(); }
     }
-
-    private async void Iptal_Clicked(object sender, EventArgs e) => await Navigation.PopAsync();
 }
